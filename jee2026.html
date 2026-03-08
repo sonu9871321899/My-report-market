@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JEE 2026 — My Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050810;
+  --card: #0d1117;
+  --border: #1e2535;
+  --accent: #00f5d4;
+  --accent2: #f5a623;
+  --accent3: #e74c3c;
+  --phys: #4ecdc4;
+  --chem: #f7b731;
+  --math: #a29bfe;
+  --text: #e8eaf0;
+  --muted: #6a7a9a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #0d1117 0%, #0a1628 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 16px 10px;
+  position: sticky; top: 0; z-index: 100;
+}
+.header-top { display: flex; justify-content: space-between; align-items: center; }
+.logo { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+.logo span { color: var(--accent2); }
+.countdown-pill {
+  background: linear-gradient(90deg, #e74c3c22, #e74c3c44);
+  border: 1px solid #e74c3c66;
+  border-radius: 20px; padding: 4px 12px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px; color: #e74c3c; font-weight: 700;
+}
+
+/* Motivation strip */
+.motivation {
+  background: linear-gradient(90deg, #00f5d415, #a29bfe15);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 16px;
+  font-size: 11px; color: var(--accent);
+  font-style: italic; text-align: center;
+  letter-spacing: 0.3px;
+}
+
+/* Bottom Nav */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #0d1117; border-top: 1px solid var(--border);
+  display: flex; z-index: 100;
+}
+.nav-btn {
+  flex: 1; padding: 10px 4px 8px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  font-size: 9px; color: var(--muted); cursor: pointer; border: none;
+  background: none; transition: color 0.2s;
+}
+.nav-btn.active { color: var(--accent); }
+.nav-btn .nav-icon { font-size: 18px; }
+
+/* Content */
+.content-wrap { display: none; padding-bottom: 70px; }
+.content-wrap.active { display: block; }
+
+/* Section title */
+.sec-title {
+  padding: 14px 16px 6px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 700;
+  color: var(--muted); letter-spacing: 1px; text-transform: uppercase;
+}
+
+/* ── HOME TAB ── */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 16px; }
+.stat-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px 12px;
+}
+.stat-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+.stat-val { font-family: 'Space Mono', monospace; font-size: 22px; font-weight: 700; }
+.stat-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* Subject progress */
+.subj-card {
+  margin: 0 16px 10px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px;
+}
+.subj-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.subj-name { font-size: 13px; font-weight: 600; }
+.subj-pct { font-family: 'Space Mono', monospace; font-size: 13px; }
+.prog-bar { height: 6px; background: #1e2535; border-radius: 3px; overflow: hidden; margin-bottom: 12px; }
+.prog-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+
+/* JEE dates */
+.dates-list { padding: 0 16px; }
+.date-item {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px; margin-bottom: 8px;
+}
+.date-badge {
+  background: #1e2535; border-radius: 8px;
+  padding: 6px 10px; text-align: center; min-width: 48px;
+}
+.date-day { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; color: var(--accent); line-height: 1; }
+.date-mon { font-size: 9px; color: var(--muted); text-transform: uppercase; }
+.date-info { flex: 1; }
+.date-name { font-size: 13px; font-weight: 600; }
+.date-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.date-days-left { font-family: 'Space Mono', monospace; font-size: 11px; padding: 3px 8px; border-radius: 10px; }
+.days-urgent { background: #e74c3c22; color: #e74c3c; }
+.days-soon { background: #f5a62322; color: #f5a623; }
+.days-ok { background: #00f5d422; color: #00f5d4; }
+
+/* ── SYLLABUS TAB ── */
+.subj-tabs { display: flex; gap: 8px; padding: 10px 16px; overflow-x: auto; }
+.subj-tab {
+  padding: 6px 16px; border-radius: 16px; font-size: 12px; font-weight: 600;
+  cursor: pointer; white-space: nowrap; border: 1px solid var(--border);
+  background: var(--card); color: var(--muted);
+}
+.subj-tab.active-phys { background: #4ecdc422; border-color: #4ecdc4; color: #4ecdc4; }
+.subj-tab.active-chem { background: #f7b73122; border-color: #f7b731; color: #f7b731; }
+.subj-tab.active-math { background: #a29bfe22; border-color: #a29bfe; color: #a29bfe; }
+
+.chapter-list { padding: 0 16px; }
+.chapter-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid #1a1f2e; cursor: pointer;
+}
+.chapter-item:last-child { border-bottom: none; }
+.chk-box {
+  width: 20px; height: 20px; border-radius: 6px;
+  border: 2px solid var(--border); display: flex;
+  align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all 0.2s; font-size: 11px;
+}
+.chk-box.done { background: var(--accent); border-color: var(--accent); color: #000; }
+.chapter-name { flex: 1; font-size: 13px; }
+.chapter-name.done { color: var(--muted); text-decoration: line-through; }
+.chapter-imp { font-size: 9px; padding: 2px 6px; border-radius: 6px; }
+.imp-high { background: #e74c3c22; color: #e74c3c; }
+.imp-mid { background: #f5a62322; color: #f5a623; }
+
+/* ── YOUTUBE TAB ── */
+.yt-card {
+  margin: 8px 16px; background: var(--card);
+  border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+  cursor: pointer; transition: border-color 0.2s;
+}
+.yt-card:hover { border-color: #e74c3c66; }
+.yt-thumb {
+  background: #1a1f2e; height: 90px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.yt-play { font-size: 32px; }
+.yt-subj-tag {
+  position: absolute; top: 8px; left: 8px;
+  font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 8px;
+}
+.yt-body { padding: 10px 12px; }
+.yt-title { font-size: 12px; font-weight: 600; line-height: 1.4; margin-bottom: 4px; }
+.yt-meta { font-size: 10px; color: var(--muted); display: flex; gap: 10px; }
+.yt-teacher { color: var(--accent); }
+
+/* ── PYQ TAB ── */
+.pyq-year-tabs { display: flex; gap: 8px; padding: 10px 16px; overflow-x: auto; }
+.pyq-tab {
+  padding: 5px 14px; border-radius: 14px; font-size: 11px;
+  font-weight: 600; cursor: pointer; white-space: nowrap;
+  border: 1px solid var(--border); background: var(--card); color: var(--muted);
+}
+.pyq-tab.active { background: #a29bfe22; border-color: #a29bfe; color: #a29bfe; }
+.pyq-card {
+  margin: 6px 16px; background: var(--card);
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px; cursor: pointer; transition: border-color 0.2s;
+}
+.pyq-card:hover { border-color: var(--accent); }
+.pyq-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.pyq-name { font-size: 13px; font-weight: 600; }
+.pyq-badge { font-size: 10px; padding: 2px 8px; border-radius: 8px; }
+.pyq-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+.pyq-btn {
+  display: inline-block; margin-top: 10px;
+  background: #00f5d415; border: 1px solid #00f5d444;
+  color: var(--accent); font-size: 11px; font-weight: 600;
+  padding: 5px 14px; border-radius: 8px; cursor: pointer;
+}
+
+/* ── STUDY PLAN TAB ── */
+.today-card {
+  margin: 10px 16px;
+  background: linear-gradient(135deg, #0d1117, #0a1628);
+  border: 1px solid var(--accent);
+  border-radius: 14px; padding: 16px;
+}
+.today-label { font-size: 10px; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.today-quote { font-size: 14px; font-weight: 600; line-height: 1.5; color: var(--text); }
+.today-author { font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+.schedule-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  margin: 0 16px 8px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px; cursor: pointer;
+}
+.sched-time {
+  font-family: 'Space Mono', monospace; font-size: 10px;
+  color: var(--muted); white-space: nowrap; min-width: 52px;
+}
+.sched-content { flex: 1; }
+.sched-title { font-size: 13px; font-weight: 600; }
+.sched-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.sched-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+
+/* Mock tests */
+.mock-card {
+  margin: 8px 16px; background: var(--card);
+  border: 1px solid var(--border); border-radius: 12px; padding: 14px;
+}
+.mock-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.mock-name { font-size: 13px; font-weight: 600; }
+.mock-free { font-size: 10px; background: #00f5d422; color: var(--accent); padding: 2px 8px; border-radius: 8px; font-weight: 700; }
+.mock-paid { font-size: 10px; background: #f5a62322; color: var(--accent2); padding: 2px 8px; border-radius: 8px; font-weight: 700; }
+.mock-desc { font-size: 11px; color: var(--muted); line-height: 1.5; margin-bottom: 10px; }
+.mock-btn {
+  display: inline-block; background: #e74c3c22; border: 1px solid #e74c3c66;
+  color: #e74c3c; font-size: 11px; font-weight: 600;
+  padding: 6px 16px; border-radius: 8px; cursor: pointer;
+  text-decoration: none;
+}
+
+/* Motivation tab */
+.motiv-card {
+  margin: 10px 16px;
+  border-radius: 14px; padding: 20px;
+  position: relative; overflow: hidden;
+}
+.motiv-quote { font-size: 16px; font-weight: 600; line-height: 1.6; margin-bottom: 10px; }
+.motiv-by { font-size: 12px; opacity: 0.7; }
+.motiv-emoji { font-size: 40px; position: absolute; right: 16px; top: 16px; opacity: 0.3; }
+
+.tips-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  margin: 0 16px 8px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px;
+}
+.tips-num {
+  font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700;
+  color: var(--accent); opacity: 0.5; line-height: 1;
+}
+.tips-text { font-size: 13px; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">JEE<span>2026</span></div>
+    <div class="countdown-pill" id="countdown-pill">⏳ Loading...</div>
+  </div>
+</div>
+<div class="motivation" id="motiv-strip">🔥 "Every expert was once a beginner. Keep going!"</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <button class="nav-btn active" onclick="showTab('home')" id="nav-home">
+    <span class="nav-icon">🏠</span>Home
+  </button>
+  <button class="nav-btn" onclick="showTab('syllabus')" id="nav-syllabus">
+    <span class="nav-icon">📚</span>Syllabus
+  </button>
+  <button class="nav-btn" onclick="showTab('youtube')" id="nav-youtube">
+    <span class="nav-icon">▶️</span>Videos
+  </button>
+  <button class="nav-btn" onclick="showTab('pyq')" id="nav-pyq">
+    <span class="nav-icon">📝</span>PYQ
+  </button>
+  <button class="nav-btn" onclick="showTab('plan')" id="nav-plan">
+    <span class="nav-icon">📅</span>Plan
+  </button>
+  <button class="nav-btn" onclick="showTab('motivation')" id="nav-motivation">
+    <span class="nav-icon">💪</span>Boost
+  </button>
+</div>
+
+<!-- ══ HOME TAB ══ -->
+<div class="content-wrap active" id="tab-home">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Days to JEE Mains</div>
+      <div class="stat-val" id="days-mains" style="color:#e74c3c;">—</div>
+      <div class="stat-sub">Jan 2026</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Days to JEE Advanced</div>
+      <div class="stat-val" id="days-adv" style="color:#f5a623;">—</div>
+      <div class="stat-sub">May 2026</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Chapters Done</div>
+      <div class="stat-val" id="chap-done" style="color:#00f5d4;">0</div>
+      <div class="stat-sub">out of 90</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Today's Goal</div>
+      <div class="stat-val" style="color:#a29bfe; font-size:16px;">Study Hard!</div>
+      <div class="stat-sub">Never give up</div>
+    </div>
+  </div>
+
+  <div class="sec-title">Subject Progress</div>
+  <div class="subj-card">
+    <div class="subj-row">
+      <div class="subj-name" style="color:var(--phys)">⚡ Physics</div>
+      <div class="subj-pct" style="color:var(--phys)" id="phys-pct">0%</div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="phys-bar" style="width:0%;background:#4ecdc4;"></div></div>
+    <div class="subj-row">
+      <div class="subj-name" style="color:var(--chem)">🧪 Chemistry</div>
+      <div class="subj-pct" style="color:var(--chem)" id="chem-pct">0%</div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="chem-bar" style="width:0%;background:#f7b731;"></div></div>
+    <div class="subj-row">
+      <div class="subj-name" style="color:var(--math)">🔢 Mathematics</div>
+      <div class="subj-pct" style="color:var(--math)" id="math-pct">0%</div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="math-bar" style="width:0%;background:#a29bfe;"></div></div>
+  </div>
+
+  <div class="sec-title">Important Dates</div>
+  <div class="dates-list">
+    <div class="date-item">
+      <div class="date-badge"><div class="date-day">22</div><div class="date-mon">Apr</div></div>
+      <div class="date-info">
+        <div class="date-name">JEE Advanced 2025</div>
+        <div class="date-sub">IIT pattern — practice ke liye</div>
+      </div>
+      <div class="date-days-left days-ok" id="adv25-days">—</div>
+    </div>
+    <div class="date-item">
+      <div class="date-badge"><div class="date-day">Jan</div><div class="date-mon">2026</div></div>
+      <div class="date-info">
+        <div class="date-name">JEE Mains 2026 Session 1</div>
+        <div class="date-sub">Exact date TBA — approx Jan 20-30</div>
+      </div>
+      <div class="date-days-left days-soon" id="mains26-days">~300 days</div>
+    </div>
+    <div class="date-item">
+      <div class="date-badge"><div class="date-day">Apr</div><div class="date-mon">2026</div></div>
+      <div class="date-info">
+        <div class="date-name">JEE Mains 2026 Session 2</div>
+        <div class="date-sub">April 2026 (approx)</div>
+      </div>
+      <div class="date-days-left days-ok">~390 days</div>
+    </div>
+    <div class="date-item">
+      <div class="date-badge"><div class="date-day">May</div><div class="date-mon">2026</div></div>
+      <div class="date-info">
+        <div class="date-name">JEE Advanced 2026</div>
+        <div class="date-sub">Top 2.5 lakh qualify honge</div>
+      </div>
+      <div class="date-days-left days-ok">~450 days</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SYLLABUS TAB ══ -->
+<div class="content-wrap" id="tab-syllabus">
+  <div class="subj-tabs">
+    <button class="subj-tab active-phys" onclick="showSubj('phys')" id="stab-phys">⚡ Physics</button>
+    <button class="subj-tab" onclick="showSubj('chem')" id="stab-chem">🧪 Chemistry</button>
+    <button class="subj-tab" onclick="showSubj('math')" id="stab-math">🔢 Mathematics</button>
+  </div>
+  <div class="chapter-list" id="chapter-list"></div>
+</div>
+
+<!-- ══ YOUTUBE TAB ══ -->
+<div class="content-wrap" id="tab-youtube">
+  <div class="sec-title">Top JEE Teachers — YouTube</div>
+  <div id="yt-list"></div>
+</div>
+
+<!-- ══ PYQ TAB ══ -->
+<div class="content-wrap" id="tab-pyq">
+  <div class="sec-title">Previous Year Questions</div>
+  <div class="pyq-year-tabs">
+    <button class="pyq-tab active" onclick="showPYQ('all')" id="pyq-all">All</button>
+    <button class="pyq-tab" onclick="showPYQ('phys')" id="pyq-phys">⚡ Physics</button>
+    <button class="pyq-tab" onclick="showPYQ('chem')" id="pyq-chem">🧪 Chemistry</button>
+    <button class="pyq-tab" onclick="showPYQ('math')" id="pyq-math">🔢 Maths</button>
+  </div>
+  <div id="pyq-list"></div>
+</div>
+
+<!-- ══ STUDY PLAN TAB ══ -->
+<div class="content-wrap" id="tab-plan">
+  <div class="today-card">
+    <div class="today-label">💡 Today's Mantra</div>
+    <div class="today-quote" id="daily-quote">Loading...</div>
+    <div class="today-author" id="daily-author"></div>
+  </div>
+
+  <div class="sec-title">Ideal Daily Schedule</div>
+  <div id="schedule-list"></div>
+
+  <div class="sec-title" style="margin-top:8px;">Free Mock Tests</div>
+  <div id="mock-list"></div>
+</div>
+
+<!-- ══ MOTIVATION TAB ══ -->
+<div class="content-wrap" id="tab-motivation">
+  <div class="sec-title">Daily Boost 💪</div>
+  <div id="motiv-cards"></div>
+  <div class="sec-title" style="margin-top:4px;">Top 10 JEE Tips</div>
+  <div id="tips-list"></div>
+</div>
+
+<script>
+// ══════════════════════════════════
+// DATA
+// ══════════════════════════════════
+const physicsChapters = [
+  {name:"Kinematics", imp:"high"},
+  {name:"Laws of Motion", imp:"high"},
+  {name:"Work, Energy & Power", imp:"high"},
+  {name:"Rotational Motion", imp:"high"},
+  {name:"Gravitation", imp:"mid"},
+  {name:"Simple Harmonic Motion", imp:"high"},
+  {name:"Waves & Sound", imp:"mid"},
+  {name:"Heat & Thermodynamics", imp:"high"},
+  {name:"Electrostatics", imp:"high"},
+  {name:"Current Electricity", imp:"high"},
+  {name:"Magnetic Effects of Current", imp:"high"},
+  {name:"Electromagnetic Induction", imp:"high"},
+  {name:"Optics (Ray + Wave)", imp:"high"},
+  {name:"Modern Physics", imp:"high"},
+  {name:"Semiconductors", imp:"mid"},
+  {name:"Fluid Mechanics", imp:"mid"},
+  {name:"Elasticity & Surface Tension", imp:"mid"},
+  {name:"Alternating Current", imp:"high"},
+  {name:"Electromagnetic Waves", imp:"mid"},
+  {name:"Units & Dimensions", imp:"mid"},
+  {name:"Error Analysis", imp:"mid"},
+  {name:"Communication Systems", imp:"mid"},
+  {name:"Dual Nature of Radiation", imp:"mid"},
+  {name:"Nuclear Physics", imp:"high"},
+  {name:"Capacitance", imp:"high"},
+  {name:"Moving Charges in Field", imp:"mid"},
+  {name:"Thermal Properties of Matter", imp:"mid"},
+  {name:"Kinetic Theory of Gases", imp:"mid"},
+  {name:"Photoelectric Effect", imp:"high"},
+  {name:"X-rays & Atomic Models", imp:"mid"},
+];
+const chemChapters = [
+  {name:"Mole Concept & Stoichiometry", imp:"high"},
+  {name:"Atomic Structure", imp:"high"},
+  {name:"Chemical Bonding", imp:"high"},
+  {name:"States of Matter", imp:"mid"},
+  {name:"Thermodynamics", imp:"high"},
+  {name:"Chemical Equilibrium", imp:"high"},
+  {name:"Ionic Equilibrium", imp:"high"},
+  {name:"Redox Reactions", imp:"high"},
+  {name:"Electrochemistry", imp:"high"},
+  {name:"Chemical Kinetics", imp:"high"},
+  {name:"Surface Chemistry", imp:"mid"},
+  {name:"Periodic Table & Properties", imp:"high"},
+  {name:"s-Block Elements", imp:"mid"},
+  {name:"p-Block Elements", imp:"high"},
+  {name:"d & f Block Elements", imp:"high"},
+  {name:"Coordination Compounds", imp:"high"},
+  {name:"General Organic Chemistry", imp:"high"},
+  {name:"Hydrocarbons", imp:"high"},
+  {name:"Haloalkanes & Haloarenes", imp:"high"},
+  {name:"Alcohols, Phenols & Ethers", imp:"high"},
+  {name:"Aldehydes & Ketones", imp:"high"},
+  {name:"Carboxylic Acids", imp:"high"},
+  {name:"Amines", imp:"high"},
+  {name:"Biomolecules", imp:"mid"},
+  {name:"Polymers", imp:"mid"},
+  {name:"Environmental Chemistry", imp:"mid"},
+  {name:"Solid State", imp:"mid"},
+  {name:"Solutions & Colligative Properties", imp:"high"},
+  {name:"Metallurgy", imp:"mid"},
+  {name:"Qualitative Analysis", imp:"mid"},
+];
+const mathChapters = [
+  {name:"Sets, Relations & Functions", imp:"high"},
+  {name:"Complex Numbers", imp:"high"},
+  {name:"Quadratic Equations", imp:"high"},
+  {name:"Sequences & Series", imp:"high"},
+  {name:"Permutations & Combinations", imp:"high"},
+  {name:"Binomial Theorem", imp:"high"},
+  {name:"Straight Lines", imp:"high"},
+  {name:"Circles", imp:"high"},
+  {name:"Conic Sections (Parabola)", imp:"high"},
+  {name:"Conic Sections (Ellipse)", imp:"high"},
+  {name:"Conic Sections (Hyperbola)", imp:"high"},
+  {name:"3D Geometry", imp:"high"},
+  {name:"Vectors", imp:"high"},
+  {name:"Matrices & Determinants", imp:"high"},
+  {name:"Limits & Continuity", imp:"high"},
+  {name:"Differentiation", imp:"high"},
+  {name:"Applications of Derivatives", imp:"high"},
+  {name:"Indefinite Integration", imp:"high"},
+  {name:"Definite Integration", imp:"high"},
+  {name:"Differential Equations", imp:"high"},
+  {name:"Probability", imp:"high"},
+  {name:"Statistics", imp:"mid"},
+  {name:"Trigonometry (Ratios)", imp:"high"},
+  {name:"Inverse Trigonometry", imp:"high"},
+  {name:"Trigonometric Equations", imp:"high"},
+  {name:"Mathematical Induction", imp:"mid"},
+  {name:"Mathematical Reasoning", imp:"mid"},
+  {name:"Linear Programming", imp:"mid"},
+  {name:"Height & Distance", imp:"mid"},
+  {name:"Logarithms", imp:"mid"},
+];
+
+const ytVideos = [
+  {subj:"Physics", subjCls:"phys", teacher:"Prateek Jain (PW)", title:"Electrostatics — Full Chapter Master Class (JEE 2026)", channel:"Physics Wallah", link:"https://youtube.com/@PhysicsWallah"},
+  {subj:"Physics", subjCls:"phys", teacher:"NV Sir (Vedantu)", title:"Rotational Motion — Most Important Problems JEE", channel:"Vedantu JEE", link:"https://youtube.com/@VedantuJEEEnglish"},
+  {subj:"Physics", subjCls:"phys", teacher:"HC Verma Lectures", title:"Optics — Ray Optics Complete JEE Level", channel:"HC Verma Official", link:"https://youtube.com/@HCVerma"},
+  {subj:"Chemistry", subjCls:"chem", teacher:"VK Jaiswal (Allen)", title:"Organic Chemistry — GOC Complete Revision", channel:"Allen JEE", link:"https://youtube.com/@AllenJEE"},
+  {subj:"Chemistry", subjCls:"chem", teacher:"Paaras Thakur (PW)", title:"Electrochemistry — Full Chapter 1-Shot JEE 2026", channel:"Physics Wallah", link:"https://youtube.com/@PhysicsWallah"},
+  {subj:"Chemistry", subjCls:"chem", teacher:"Arvind Arora (W2W)", title:"Coordination Compounds — Complete JEE Concepts", channel:"Arvind Academy", link:"https://youtube.com/@ArvindAcademy"},
+  {subj:"Maths", subjCls:"math", teacher:"Manoj Chauhan Sir (Allen)", title:"Definite Integration — Best Tricks JEE 2026", channel:"Allen JEE", link:"https://youtube.com/@AllenJEE"},
+  {subj:"Maths", subjCls:"math", teacher:"Lakshya Kumar (PW)", title:"Vectors & 3D — Full Master Class One Shot", channel:"Physics Wallah", link:"https://youtube.com/@PhysicsWallah"},
+  {subj:"Maths", subjCls:"math", teacher:"Vineet Loomba", title:"Probability — All Concepts + PYQ Discussion", channel:"Vineet Loomba", link:"https://youtube.com/@VineetLoomba"},
+  {subj:"Physics", subjCls:"phys", teacher:"Mohit Tyagi", title:"SHM + Waves — Complete JEE Revision", channel:"Mohit Tyagi", link:"https://youtube.com/@MohitTyagiPhysics"},
+  {subj:"Maths", subjCls:"math", teacher:"RD Sharma / NCERT", title:"Conic Sections — Ellipse & Hyperbola JEE PYQ", channel:"Unacademy JEE", link:"https://youtube.com/@unacademyjee"},
+  {subj:"Chemistry", subjCls:"chem", teacher:"Sachin Sir (Unacademy)", title:"Chemical Kinetics — Complete 1-Shot Revision", channel:"Unacademy JEE", link:"https://youtube.com/@unacademyjee"},
+];
+
+const pyqData = [
+  {subj:"phys", name:"JEE Mains Physics 2024 (Jan)", badge:"2024", badgeCls:"days-ok", desc:"35 questions — Full paper with detailed solutions. Jan 2024 session.", link:"https://jeemain.nta.ac.in"},
+  {subj:"chem", name:"JEE Mains Chemistry 2024 (Apr)", badge:"2024", badgeCls:"days-ok", desc:"35 questions — Organic heavy paper. Apr 2024 session detailed solutions.", link:"https://jeemain.nta.ac.in"},
+  {subj:"math", name:"JEE Mains Maths 2024 (Jan)", badge:"2024", badgeCls:"days-ok", desc:"35 questions — Calculus + Algebra heavy. Tricky integer type included.", link:"https://jeemain.nta.ac.in"},
+  {subj:"phys", name:"JEE Advanced Physics 2024", badge:"Adv", badgeCls:"days-urgent", desc:"Paper 1 + Paper 2 — Multi-correct, matrix match, integer type questions.", link:"https://jeeadv.ac.in"},
+  {subj:"chem", name:"JEE Advanced Chemistry 2023", badge:"Adv", badgeCls:"days-urgent", desc:"Inorganic + Organic heavy. Coordination compounds focus.", link:"https://jeeadv.ac.in"},
+  {subj:"math", name:"JEE Advanced Maths 2023", badge:"Adv", badgeCls:"days-urgent", desc:"Calculus + Complex Numbers heavy. Paragraph type questions.", link:"https://jeeadv.ac.in"},
+  {subj:"phys", name:"JEE Mains Physics 2023 (Complete)", badge:"2023", badgeCls:"days-soon", desc:"All sessions 2023 — Chapter wise sorted PYQ practice.", link:"https://jeemain.nta.ac.in"},
+  {subj:"math", name:"JEE Mains Maths 2022-23 (Chapterwise)", badge:"Multi", badgeCls:"days-soon", desc:"Chapter-wise sorted — Best for topic-specific practice.", link:"https://jeemain.nta.ac.in"},
+];
+
+const scheduleData = [
+  {time:"5:30 AM", title:"Wake up + Revision", sub:"Yesterday's notes — 30 min light reading", color:"#00f5d4"},
+  {time:"6:00 AM", title:"Physics", sub:"2 chapters + solved examples (Allen/PW notes)", color:"#4ecdc4"},
+  {time:"8:30 AM", title:"School / Coaching", sub:"Allen / PW batch — full attention", color:"#f5a623"},
+  {time:"2:00 PM", title:"Lunch + Rest", sub:"Rest 30 min — brain recharge ⚡", color:"#a29bfe"},
+  {time:"3:00 PM", title:"Chemistry", sub:"Theory + NCERT + PYQ questions", color:"#f7b731"},
+  {time:"5:30 PM", title:"Short Break", sub:"Walk / exercise — 30 min", color:"#00f5d4"},
+  {time:"6:00 PM", title:"Mathematics", sub:"Problems + DPP from coaching", color:"#a29bfe"},
+  {time:"8:30 PM", title:"Dinner + Relax", sub:"No screens — mental rest", color:"#e74c3c"},
+  {time:"9:00 PM", title:"Weak Topic Revision", sub:"1 topic you find hard — 1 hour focused", color:"#f5a623"},
+  {time:"10:30 PM", title:"Sleep 😴", sub:"7-8 hours sleep — mandatory for memory!", color:"#00f5d4"},
+];
+
+const mockTests = [
+  {name:"Allen Test Series", tag:"Paid", tagCls:"mock-paid", desc:"India's best test series. ALLEN students get it with fee. Detailed analysis after each test. Highly recommended.", link:"https://allen.ac.in"},
+  {name:"PW Test Series (Arjuna/Lakshya)", tag:"Paid", tagCls:"mock-paid", desc:"Physics Wallah's chapter-wise + full syllabus tests. Very affordable. Good for self-study students.", link:"https://pw.live"},
+  {name:"Embibe Free Tests", tag:"Free", tagCls:"mock-free", desc:"100+ free JEE mock tests. AI-based analysis tells your weak chapters automatically.", link:"https://embibe.com"},
+  {name:"NTA Official Mock Tests", tag:"Free", tagCls:"mock-free", desc:"Official NTA pattern mock tests — same interface as real JEE Mains exam. Must practice.", link:"https://nta.ac.in"},
+  {name:"Jeemain.nta.ac.in Practice", tag:"Free", tagCls:"mock-free", desc:"NTA official practice platform — exact JEE interface practice. Best for getting comfortable with exam format.", link:"https://jeemain.nta.ac.in"},
+];
+
+const motivQuotes = [
+  {quote:"जो पढ़ाई में मेहनत करते हैं, वो ज़िंदगी में आराम करते हैं। जो पढ़ाई में आराम करते हैं, वो ज़िंदगी में मेहनत करते हैं।", by:"— एक सच्चाई", bg:"linear-gradient(135deg,#0d2137,#0a1628)", border:"#00f5d4"},
+  {quote:"IIT का सपना देखना काफी नहीं — रोज़ उस सपने के लिए काम करना पड़ता है।", by:"— हर IITian की कहानी", bg:"linear-gradient(135deg,#1a0a0a,#2d0f0f)", border:"#e74c3c"},
+  {quote:"Hard work beats talent when talent doesn't work hard.", by:"— Tim Notke", bg:"linear-gradient(135deg,#0a1a0a,#0f2d0f)", border:"#00d4aa"},
+  {quote:"तुम थक सकते हो, हार नहीं सकते। थकान temporary है, IIT permanent है।", by:"— Every JEE Topper", bg:"linear-gradient(135deg,#1a1a0a,#2d2d0f)", border:"#f5a623"},
+  {quote:"Believe you can and you're halfway there.", by:"— Theodore Roosevelt", bg:"linear-gradient(135deg,#0d0a1a,#1a1028)", border:"#a29bfe"},
+];
+
+const tips = [
+  "NCERT पहले — Chem ke liye NCERT Bible hai. Line by line padho.",
+  "रोज़ DPP solve karo — Coaching ki DPP skip mat karna kabhi bhi.",
+  "PYQ zaroori hai — Last 10 saal ke JEE questions baar baar dekho.",
+  "Weak chapters identify karo — Progress tracker use karo. Ek bhi chapter ignore mat karo.",
+  "Physics mein formula yaad nahi, concept samjho — Derivation samjho to formula automatically yaad rahega.",
+  "Maths mein speed — Calculation speed badhao. Shortcuts sikho, Vedic Math try karo.",
+  "Mock tests time pe do — Ghar par bhi exam hall jaisi conditions banao.",
+  "Neend mat choro — 7-8 hours sleep memory consolidation ke liye zaroori hai.",
+  "Social media limit karo — Phone use ka time fix karo — max 30 min per day.",
+  "Revision cycle banao — Har 7 din mein jo padha usski ek baar revision karo.",
+];
+
+const dailyQuotes = [
+  {q:"आज जो मेहनत करोगे, कल उसका फल मिलेगा।", a:"— सफलता का रास्ता"},
+  {q:"एक IITian का सफर हज़ार छोटे-छोटे steps से बनता है।", a:"— हर रोज़ एक कदम"},
+  {q:"Success is the sum of small efforts, repeated day in and day out.", a:"— Robert Collier"},
+  {q:"मुश्किल chapters को avoid मत करो — वही तुम्हें दूसरों से आगे ले जाएंगे।", a:"— JEE Topper Strategy"},
+  {q:"The secret of getting ahead is getting started.", a:"— Mark Twain"},
+  {q:"Consistency beats intensity every single time.", a:"— Study Mantra"},
+  {q:"आज का दर्द, कल की शान बनेगा।", a:"— IIT का रास्ता"},
+];
+
+// ══════════════════════════════════
+// STATE (localStorage for persistence)
+// ══════════════════════════════════
+let chapDone = JSON.parse(localStorage.getItem('jee_chap') || '{}');
+let curSubj = 'phys';
+
+function saveChap() { localStorage.setItem('jee_chap', JSON.stringify(chapDone)); }
+
+// ══════════════════════════════════
+// COUNTDOWN
+// ══════════════════════════════════
+function calcDays(targetDate) {
+  const now = new Date();
+  const target = new Date(targetDate);
+  const diff = Math.ceil((target - now) / (1000*60*60*24));
+  return diff > 0 ? diff : 0;
+}
+
+function initCountdown() {
+  const dMains = calcDays('2026-01-25');
+  const dAdv = calcDays('2026-05-24');
+  const dAdv25 = calcDays('2025-05-18');
+  document.getElementById('days-mains').textContent = dMains;
+  document.getElementById('days-adv').textContent = dAdv;
+  document.getElementById('countdown-pill').textContent = `⏳ JEE Mains: ${dMains} days`;
+  document.getElementById('adv25-days').textContent = dAdv25 > 0 ? `${dAdv25}d left` : 'Done';
+}
+
+// ══════════════════════════════════
+// CHAPTER PROGRESS
+// ══════════════════════════════════
+function updateProgress() {
+  const pDone = physicsChapters.filter((_,i)=>chapDone[`phys_${i}`]).length;
+  const cDone = chemChapters.filter((_,i)=>chapDone[`chem_${i}`]).length;
+  const mDone = mathChapters.filter((_,i)=>chapDone[`math_${i}`]).length;
+  const total = pDone + cDone + mDone;
+  const pPct = Math.round(pDone/physicsChapters.length*100);
+  const cPct = Math.round(cDone/chemChapters.length*100);
+  const mPct = Math.round(mDone/mathChapters.length*100);
+  document.getElementById('phys-pct').textContent = pPct+'%';
+  document.getElementById('chem-pct').textContent = cPct+'%';
+  document.getElementById('math-pct').textContent = mPct+'%';
+  document.getElementById('phys-bar').style.width = pPct+'%';
+  document.getElementById('chem-bar').style.width = cPct+'%';
+  document.getElementById('math-bar').style.width = mPct+'%';
+  document.getElementById('chap-done').textContent = total;
+}
+
+function toggleChap(subj, idx) {
+  const key = `${subj}_${idx}`;
+  chapDone[key] = !chapDone[key];
+  saveChap();
+  updateProgress();
+  renderChapters(subj);
+}
+
+function renderChapters(subj) {
+  const list = subj==='phys' ? physicsChapters : subj==='chem' ? chemChapters : mathChapters;
+  const doneCnt = list.filter((_,i)=>chapDone[`${subj}_${i}`]).length;
+  const color = subj==='phys' ? '#4ecdc4' : subj==='chem' ? '#f7b731' : '#a29bfe';
+  document.getElementById('chapter-list').innerHTML = `
+    <div style="padding:10px 16px 6px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:12px;color:var(--muted);">${doneCnt}/${list.length} chapters done</span>
+      <span style="font-size:12px;color:${color};font-weight:700;">${Math.round(doneCnt/list.length*100)}% complete</span>
+    </div>
+    ${list.map((ch,i) => `
+    <div class="chapter-item" onclick="toggleChap('${subj}',${i})">
+      <div class="chk-box ${chapDone[`${subj}_${i}`]?'done':''}">
+        ${chapDone[`${subj}_${i}`]?'✓':''}
+      </div>
+      <div class="chapter-name ${chapDone[`${subj}_${i}`]?'done':''}">${ch.name}</div>
+      <div class="chapter-imp ${ch.imp==='high'?'imp-high':'imp-mid'}">${ch.imp==='high'?'🔥 High':'📌 Mid'}</div>
+    </div>`).join('')}
+  `;
+}
+
+function showSubj(subj) {
+  curSubj = subj;
+  ['phys','chem','math'].forEach(s => {
+    const btn = document.getElementById(`stab-${s}`);
+    btn.className = `subj-tab${subj===s ? ` active-${s}` : ''}`;
+  });
+  renderChapters(subj);
+}
+
+// ══════════════════════════════════
+// YOUTUBE
+// ══════════════════════════════════
+function renderYT() {
+  const colors = {phys:'#4ecdc4', chem:'#f7b731', math:'#a29bfe'};
+  const bgs = {phys:'#0d2020', chem:'#1a1500', math:'#100d20'};
+  document.getElementById('yt-list').innerHTML = ytVideos.map(v => `
+    <div class="yt-card" onclick="window.open('${v.link}','_blank')">
+      <div class="yt-thumb" style="background:${bgs[v.subjCls]};">
+        <div class="yt-play">▶️</div>
+        <div class="yt-subj-tag" style="background:${colors[v.subjCls]}22;color:${colors[v.subjCls]};border:1px solid ${colors[v.subjCls]}44;">
+          ${v.subj}
+        </div>
+      </div>
+      <div class="yt-body">
+        <div class="yt-title">${v.title}</div>
+        <div class="yt-meta">
+          <span class="yt-teacher">${v.teacher}</span>
+          <span>${v.channel}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════
+// PYQ
+// ══════════════════════════════════
+function renderPYQ(filter) {
+  const list = filter==='all' ? pyqData : pyqData.filter(p=>p.subj===filter);
+  document.getElementById('pyq-list').innerHTML = list.map(p => `
+    <div class="pyq-card" onclick="window.open('${p.link}','_blank')">
+      <div class="pyq-top">
+        <div class="pyq-name">${p.name}</div>
+        <div class="pyq-badge ${p.badgeCls}">${p.badge}</div>
+      </div>
+      <div class="pyq-desc">${p.desc}</div>
+      <div class="pyq-btn">📥 Practice Now →</div>
+    </div>
+  `).join('');
+}
+
+function showPYQ(filter) {
+  ['all','phys','chem','math'].forEach(f => {
+    document.getElementById(`pyq-${f}`).classList.toggle('active', f===filter);
+  });
+  renderPYQ(filter);
+}
+
+// ══════════════════════════════════
+// SCHEDULE & MOCK
+// ══════════════════════════════════
+function renderSchedule() {
+  document.getElementById('schedule-list').innerHTML = scheduleData.map(s => `
+    <div class="schedule-item">
+      <div class="sched-dot" style="background:${s.color};"></div>
+      <div class="sched-time">${s.time}</div>
+      <div class="sched-content">
+        <div class="sched-title">${s.title}</div>
+        <div class="sched-sub">${s.sub}</div>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('mock-list').innerHTML = mockTests.map(m => `
+    <div class="mock-card">
+      <div class="mock-top">
+        <div class="mock-name">${m.name}</div>
+        <div class="${m.tagCls}">${m.tag}</div>
+      </div>
+      <div class="mock-desc">${m.desc}</div>
+      <a class="mock-btn" href="${m.link}" target="_blank">🚀 Open →</a>
+    </div>
+  `).join('');
+  // Daily quote
+  const q = dailyQuotes[new Date().getDay() % dailyQuotes.length];
+  document.getElementById('daily-quote').textContent = q.q;
+  document.getElementById('daily-author').textContent = q.a;
+}
+
+// ══════════════════════════════════
+// MOTIVATION
+// ══════════════════════════════════
+function renderMotivation() {
+  document.getElementById('motiv-cards').innerHTML = motivQuotes.map(m => `
+    <div class="motiv-card" style="background:${m.bg};border:1px solid ${m.border}44;margin-bottom:10px;">
+      <div class="motiv-emoji">💪</div>
+      <div class="motiv-quote">${m.quote}</div>
+      <div class="motiv-by">${m.by}</div>
+    </div>
+  `).join('');
+  document.getElementById('tips-list').innerHTML = tips.map((t,i) => `
+    <div class="tips-item">
+      <div class="tips-num">0${i+1}</div>
+      <div class="tips-text">${t}</div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════
+// MOTIVATION STRIP ROTATION
+// ══════════════════════════════════
+const strips = [
+  "🔥 \"Ek din aayega jab mehnat rang laayegi — tab yaad rakhna aaj ki struggle\"",
+  "⚡ Physics mein doubt? YouTube dekho, teacher se poocho — never skip!",
+  "🧪 Chemistry = NCERT + Practice. Bas itna kaafi hai JEE Mains ke liye!",
+  "🔢 Maths mein speed matters — daily 20 calculations karo without calculator",
+  "💪 Allen + PW dono se padh rahe ho — tum already 90% students se aage ho!",
+  "📝 Har din 1 PYQ solve karo — yahi JEE crack karne ka sabse bada secret hai",
+];
+let stripIdx = 0;
+setInterval(()=>{
+  stripIdx = (stripIdx+1)%strips.length;
+  document.getElementById('motiv-strip').textContent = strips[stripIdx];
+}, 4000);
+
+// ══════════════════════════════════
+// TAB NAVIGATION
+// ══════════════════════════════════
+function showTab(tab) {
+  document.querySelectorAll('.content-wrap').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('nav-'+tab).classList.add('active');
+}
+
+// ══════════════════════════════════
+// INIT
+// ══════════════════════════════════
+initCountdown();
+updateProgress();
+renderChapters('phys');
+renderYT();
+renderPYQ('all');
+renderSchedule();
+renderMotivation();
+</script>
+</body>
+</html>
