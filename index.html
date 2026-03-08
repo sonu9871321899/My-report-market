@@ -280,7 +280,7 @@ body {
     </div>
   </div>
   <div class="port-table-section">
-    <div class="section-header"><span class="s-title">Holdings (20)</span><span style="font-size:10px;color:#6a7a8a;">DPSR DEMAT</span></div>
+    <div class="section-header"><span class="s-title">Holdings (22)</span><span style="font-size:10px;color:#6a7a8a;">DPSR DEMAT</span></div>
     <div id="port-body"></div>
   </div>
 </div>
@@ -376,6 +376,8 @@ const portfolio = [
   {sym:"Yatharth Hosp", ticker:"YATHARTH.NS", cmp:647.35,      avg:713.15,  qty:125},
   {sym:"Yatra Online",  ticker:"YATRA.NS", cmp:108.92,         avg:135.83,  qty:100},
   {sym:"Zaggle",        ticker:"ZAGGLE.NS", cmp:226.87,        avg:262.50,  qty:50},
+  {sym:"Senco Gold",    ticker:"SENCO.NS",  cmp:301.80,        avg:459.00,  qty:255},
+  {sym:"SML Isuzu",     ticker:"SMLMAH.NS", cmp:4199.70,       avg:4757.32, qty:20},
 ];
 
 // ══════════════════════════════════
@@ -572,7 +574,7 @@ let wl2PriceData = {};
 async function fetchPortfolio() {
   const btn = document.getElementById('port-btn');
   btn.disabled=true; btn.textContent='⏳ Loading...';
-  let totalCurr=0; const invested=1187908.26;
+  let totalCurr=0; const invested=1400099.66;
   portPriceData = {};
   for(const h of portfolio) {
     const d = await fetchPrice(h.ticker);
