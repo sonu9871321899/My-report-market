@@ -799,6 +799,116 @@ renderChart();
 function changeChartRange(r) { renderChart(r); }
 
 // =====================
+// YAHOO FINANCE REAL DATA
+// =====================
+
+const PROXY = 'https://corsproxy.io/?';
+
+const indicesSymbols = [
+  { sym: '^NSEI', id: 0, name: 'NIFTY 50' },
+  { sym: '^BSESN', id: 1, name: 'SENSEX' },
+  { sym: '^NSEBANK', id: 2, name: 'BANK NIFTY' },
+  { sym: '^GSPC', id: 3, name: 'S&P 500' },
+  { sym: '^IXIC', id: 4, name: 'NASDAQ' },
+  { sym: 'USDINR=X', id: 5, name: 'USD/INR' },
+];
+
+const stockSymbols = [
+  'ABCAPITAL.NS','BAJAJHFL.NS','CHOLAFIN.NS','FORCEMOT.NS',
+  'NUVAMA.NS','KPITTECH.NS','NATCOPHARM.NS','RRKABEL.NS','BIKAJI.NS',
+  'AMARAJABAT.NS','LEMONTREE.NS','TRANSRAIL.NS','YATHARTH.NS','SMLMAHINDRA.NS',
+  'MRSBECTORS.NS','INDIAGLYCO.NS','FIEMIND.NS','CMSINFO.NS','SENCO.NS',
+  'IFBIND.NS','EPIGRAL.NS','OSWALAGRO.NS','ADVENZYMES.NS',
+  'AGIGREENPAC.NS','ANANDRATHI.NS','ZAGGLE.NS','NACLIND.NS',
+  'TAJGVK.NS','STUDDS.NS','YATRA.NS',
+  'EPACKDURA.NS','GOCOLORS.NS','ASALCBR.NS','LINCOLNPHAR.NS',
+  'BLSE.NS','GPTHEALTH.NS','FABTECH.NS','TOLINST.NS'
+];
+
+const nameMap = {
+  'ABCAPITAL.NS': 'Aditya Birla Cap', 'BAJAJHFL.NS': 'Bajaj Housing Fin',
+  'CHOLAFIN.NS': 'Chola Financial', 'FORCEMOT.NS': 'Force Motors',
+  'NUVAMA.NS': 'Nuvama Wealth', 'KPITTECH.NS': 'KPIT Technologies',
+  'NATCOPHARM.NS': 'Natco Pharma', 'RRKABEL.NS': 'R R Kabel',
+  'BIKAJI.NS': 'Bikaji Foods', 'AMARAJABAT.NS': 'Amara Raja Energy',
+  'LEMONTREE.NS': 'Lemon Tree Hotel', 'TRANSRAIL.NS': 'Transrail Lighting',
+  'YATHARTH.NS': 'Yatharth Hospital', 'SMLMAHINDRA.NS': 'SML Mahindra',
+  'MRSBECTORS.NS': 'Mrs Bectors Food', 'INDIAGLYCO.NS': 'India Glycols',
+  'FIEMIND.NS': 'Fiem Industries', 'CMSINFO.NS': 'CMS Info Systems',
+  'SENCO.NS': 'Senco Gold', 'IFBIND.NS': 'IFB Industries',
+  'EPIGRAL.NS': 'Epigral', 'OSWALAGRO.NS': 'Oswal Pumps',
+  'ADVENZYMES.NS': 'Advanced Enzyme', 'AGIGREENPAC.NS': 'AGI Greenpac',
+  'ANANDRATHI.NS': 'Anand Rathi Share', 'ZAGGLE.NS': 'Zaggle Prepaid',
+  'NACLIND.NS': 'NACL Industries', 'TAJGVK.NS': 'TajGVK Hotels',
+  'STUDDS.NS': 'Studds Accessories', 'YATRA.NS': 'Yatra Online',
+  'EPACKDURA.NS': 'EPack PrefabTech', 'GOCOLORS.NS': 'Go Fashion',
+  'ASALCBR.NS': 'Assoc. Alcohols', 'LINCOLNPHAR.NS': 'Lincoln Pharma',
+  'BLSE.NS': 'BLS E-Services', 'GPTHEALTH.NS': 'GPT Healthcare',
+  'FABTECH.NS': 'Fabtech Tech.', 'TOLINST.NS': 'Tolins Tyres',
+};
+
+async function fetchQuote(symbol) {
+  try {
+    const url = 'https://corsproxy.io/?' + encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/' + symbol + '?interval=1d&range=1d');
+    const res = await fetch(url);
+    const json = await res.json();
+    const meta = json.chart.result[0].meta;
+    return {
+      symbol,
+      price: meta.regularMarketPrice,
+      prev: meta.chartPreviousClose || meta.previousClose,
+    };
+  } catch(e) { return null; }
+}
+
+function fmtChg(price, prev) {
+  if (!price || !prev) return { txt: 'N/A', cls: 'neu' };
+  const chg = price - prev;
+  const pct = (chg / prev) * 100;
+  const cls = chg >= 0 ? 'pos' : 'neg';
+  const arrow = chg >= 0 ? '+' : '';
+  return { txt: arrow + pct.toFixed(2) + '%', cls };
+}
+
+async function loadRealIndices() {
+  const cards = document.querySelectorAll('.market-card');
+  for (let i = 0; i < indicesSymbols.length; i++) {
+    const s = indicesSymbols[i];
+    const q = await fetchQuote(s.sym);
+    if (!q || !cards[i]) continue;
+    const { txt, cls } = fmtChg(q.price, q.prev);
+    const priceEl = cards[i].querySelector('.mc-price');
+    const chgEl = cards[i].querySelector('.mc-change');
+    if (priceEl) priceEl.textContent = q.price ? q.price.toLocaleString('en-IN', {maximumFractionDigits:2}) : 'N/A';
+    if (chgEl) { chgEl.textContent = txt; chgEl.className = 'mc-change ' + cls; }
+    cards[i].className = 'market-card ' + cls;
+  }
+}
+
+async function loadRealStocks() {
+  const tableEl = document.getElementById('stockTable');
+  tableEl.innerHTML = '<div style="padding:12px 14px; color:#f0b429; font-family:Space Mono,monospace; font-size:11px;">⏳ Loading real prices from Yahoo Finance...</div>';
+  let html = '';
+  for (const sym of stockSymbols) {
+    const q = await fetchQuote(sym);
+    const { txt, cls } = fmtChg(q ? q.price : null, q ? q.prev : null);
+    const displayName = nameMap[sym] || sym.replace('.NS','');
+    const shortSym = sym.replace('.NS','');
+    const priceStr = q && q.price ? '₹' + q.price.toLocaleString('en-IN', {maximumFractionDigits:2}) : 'N/A';
+    html += '<div class="stock-row"><div><div class="stock-name">' + displayName + '</div><div class="stock-sym">' + shortSym + '</div></div><div class="stock-price">' + priceStr + '</div><div class="stock-chg ' + cls + '">' + txt + '</div></div>';
+  }
+  tableEl.innerHTML = html || '<div style="padding:12px; color:#888;">No data</div>';
+}
+
+async function loadAllRealData() {
+  await loadRealIndices();
+  await loadRealStocks();
+  setTimeout(loadAllRealData, 5 * 60 * 1000);
+}
+
+loadAllRealData();
+
+// =====================
 // CLOCK
 // =====================
 function updateClock() {
