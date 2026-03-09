@@ -341,7 +341,7 @@
       </div>
       <div class="result-item" style="margin-bottom:10px;text-align:left;padding:12px 16px;">
         <div class="r-label">Transport Allowance</div>
-        <div class="r-value" style="color:var(--accent2)">₹3,200 Fixed</div>
+        <div class="r-value" style="color:var(--accent2)" id="taRateShow">₹3,200 + DA%</div>
       </div>
       <div class="result-item" style="margin-bottom:10px;text-align:left;padding:12px 16px;">
         <div class="r-label">PF Employer Contribution</div>
@@ -450,8 +450,9 @@
     const daRate = parseFloat(document.getElementById('daRate').value) || 38;
     const da = basic * (daRate / 100);
     document.getElementById('daRateShow').textContent = daRate + '% of Basic';
+    document.getElementById('taRateShow').textContent = '₹3,200 + ' + daRate + '% = ₹' + ta.toLocaleString('en-IN', {maximumFractionDigits:2});
     const hra = basic * 0.27;
-    const ta = 3200;
+    const ta = 3200 + (3200 * daRate / 100);
     const gross = basic + da + hra + ta;
 
     const pfEmployee = basic * (pfPct / 100);
@@ -499,7 +500,7 @@
       <div class="slip-row"><span class="sl">Basic Salary</span><span class="sr">${fmt(d.basic)}</span></div>
       <div class="slip-row"><span class="sl">DA (${d.daRate}% of Basic)</span><span class="sr">${fmt(d.da)}</span></div>
       <div class="slip-row"><span class="sl">HRA (27% of Basic)</span><span class="sr">${fmt(d.hra)}</span></div>
-      <div class="slip-row"><span class="sl">Transport Allowance</span><span class="sr">${fmt(d.ta)}</span></div>
+      <div class="slip-row"><span class="sl">TA (₹3,200 + ${d.daRate}% = )</span><span class="sr">${fmt(d.ta)}</span></div>
       <div class="slip-row total-row"><span class="sl">Gross Salary</span><span class="sr">${fmt(d.gross)}</span></div>
 
       <div class="slip-section-title" style="margin-top:8px;">Deductions</div>
