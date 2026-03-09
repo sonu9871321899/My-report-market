@@ -449,10 +449,10 @@
 
     const daRate = parseFloat(document.getElementById('daRate').value) || 38;
     const da = basic * (daRate / 100);
-    document.getElementById('daRateShow').textContent = daRate + '% of Basic';
-    document.getElementById('taRateShow').textContent = '₹3,200 + ' + daRate + '% = ₹' + ta.toLocaleString('en-IN', {maximumFractionDigits:2});
     const hra = basic * 0.27;
     const ta = 3200 + (3200 * daRate / 100);
+    document.getElementById('daRateShow').textContent = daRate + '% of Basic';
+    document.getElementById('taRateShow').textContent = '₹3,200 + ' + daRate + '% = ₹' + ta.toLocaleString('en-IN', {maximumFractionDigits:2});
     const gross = basic + da + hra + ta;
 
     const pfEmployee = basic * (pfPct / 100);
@@ -468,9 +468,9 @@
     // Earnings
     document.getElementById('earningsGrid').innerHTML =
       makeItem('Basic', basic, 'blue') +
-      makeItem('DA (38%)', da, 'green') +
+      makeItem('DA (' + daRate + '%)', da, 'green') +
       makeItem('HRA (27%)', hra, 'green') +
-      makeItem('TA (Fixed)', ta, 'green');
+      makeItem('TA (₹3200 + ' + daRate + '%)', ta, 'green');
 
     // Deductions
     document.getElementById('deductionsGrid').innerHTML =
