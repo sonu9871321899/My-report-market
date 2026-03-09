@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salary Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e17;
+    --bg2: #111827;
+    --bg3: #1a2236;
+    --accent: #00d4aa;
+    --accent2: #3b82f6;
+    --red: #ef4444;
+    --gold: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --border: #1e2d45;
+    --card: #0f1a2e;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background: radial-gradient(ellipse at 20% 20%, rgba(0,212,170,0.04) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 80%, rgba(59,130,246,0.04) 0%, transparent 60%);
+    pointer-events:none;
+  }
+
+  .header {
+    text-align:center;
+    margin-bottom:28px;
+    padding:24px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius:16px;
+    position:relative;
+    overflow:hidden;
+  }
+  .header::before {
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+  .header h1 {
+    font-size:28px; font-weight:700; letter-spacing:2px;
+    color: var(--accent);
+    text-transform:uppercase;
+  }
+  .header p { color: var(--muted); font-size:14px; margin-top:4px; letter-spacing:1px; }
+
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  @media(max-width:650px) { .main-grid { grid-template-columns:1fr; } }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius:14px;
+    padding:22px;
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before {
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:1px;
+    background: linear-gradient(90deg, transparent, rgba(0,212,170,0.3), transparent);
+  }
+  .card-title {
+    font-size:13px; font-weight:600; letter-spacing:2px;
+    color: var(--accent); text-transform:uppercase;
+    margin-bottom:18px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .card-title::before {
+    content:''; width:3px; height:14px;
+    background: var(--accent); border-radius:2px;
+  }
+
+  .field { margin-bottom:16px; }
+  .field label {
+    display:block; font-size:12px; color: var(--muted);
+    letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;
+  }
+  .field input, .field select {
+    width:100%; padding:10px 14px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius:8px;
+    color: var(--text);
+    font-family:'JetBrains Mono', monospace;
+    font-size:15px;
+    outline:none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(0,212,170,0.1);
+  }
+  .field select option { background: var(--bg2); }
+
+  .calc-btn {
+    width:100%; padding:14px;
+    background: linear-gradient(135deg, var(--accent), #00b894);
+    color: #0a0e17;
+    border:none; border-radius:10px;
+    font-family:'Rajdhani', sans-serif;
+    font-size:16px; font-weight:700;
+    letter-spacing:2px; text-transform:uppercase;
+    cursor:pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    margin-top:4px;
+  }
+  .calc-btn:hover {
+    transform:translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0,212,170,0.3);
+  }
+  .calc-btn:active { transform:translateY(0); }
+
+  /* Results */
+  .results-card {
+    grid-column: 1 / -1;
+    display:none;
+  }
+  .results-card.show { display:block; }
+
+  .result-grid {
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap:12px;
+    margin-bottom:20px;
+  }
+  @media(max-width:500px) { .result-grid { grid-template-columns:1fr 1fr; } }
+
+  .result-item {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius:10px;
+    padding:14px;
+    text-align:center;
+    transition: border-color 0.2s;
+  }
+  .result-item:hover { border-color: rgba(0,212,170,0.3); }
+  .result-item .r-label {
+    font-size:10px; color: var(--muted); letter-spacing:1px;
+    text-transform:uppercase; margin-bottom:6px;
+  }
+  .result-item .r-value {
+    font-family:'JetBrains Mono', monospace;
+    font-size:17px; font-weight:600; color: var(--text);
+  }
+  .result-item.green .r-value { color: var(--accent); }
+  .result-item.red .r-value { color: var(--red); }
+  .result-item.gold .r-value { color: var(--gold); }
+  .result-item.blue .r-value { color: var(--accent2); }
+
+  .divider {
+    height:1px; background: var(--border); margin:16px 0;
+  }
+
+  .big-totals {
+    display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;
+  }
+  @media(max-width:500px) { .big-totals { grid-template-columns:1fr; } }
+
+  .big-box {
+    border-radius:12px; padding:18px; text-align:center;
+  }
+  .big-box.gross {
+    background: rgba(59,130,246,0.1);
+    border: 1px solid rgba(59,130,246,0.3);
+  }
+  .big-box.deduction {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+  }
+  .big-box.net {
+    background: rgba(0,212,170,0.1);
+    border: 1px solid rgba(0,212,170,0.4);
+  }
+  .big-box .b-label {
+    font-size:11px; letter-spacing:2px; text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  .big-box.gross .b-label { color: var(--accent2); }
+  .big-box.deduction .b-label { color: var(--red); }
+  .big-box.net .b-label { color: var(--accent); }
+  .big-box .b-value {
+    font-family:'JetBrains Mono', monospace;
+    font-size:22px; font-weight:700;
+  }
+  .big-box.gross .b-value { color: var(--accent2); }
+  .big-box.deduction .b-value { color: var(--red); }
+  .big-box.net .b-value { color: var(--accent); }
+  .big-box .b-sub {
+    font-size:11px; color: var(--muted); margin-top:4px;
+  }
+
+  /* Employer cost */
+  .employer-box {
+    margin-top:16px;
+    background: rgba(245,158,11,0.08);
+    border: 1px solid rgba(245,158,11,0.25);
+    border-radius:10px;
+    padding:14px 18px;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .employer-box .e-label { font-size:13px; color: var(--muted); letter-spacing:1px; }
+  .employer-box .e-value {
+    font-family:'JetBrains Mono', monospace;
+    font-size:18px; font-weight:700; color: var(--gold);
+  }
+
+  .slip-btn {
+    width:100%; padding:12px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    border-radius:10px;
+    color: var(--accent);
+    font-family:'Rajdhani', sans-serif;
+    font-size:15px; font-weight:600;
+    letter-spacing:2px; text-transform:uppercase;
+    cursor:pointer; margin-top:16px;
+    transition: background 0.2s;
+  }
+  .slip-btn:hover { background: rgba(0,212,170,0.08); }
+
+  /* Salary Slip Modal */
+  .modal-overlay {
+    display:none; position:fixed; inset:0;
+    background: rgba(0,0,0,0.8); backdrop-filter:blur(4px);
+    z-index:1000; padding:20px;
+    overflow-y:auto;
+  }
+  .modal-overlay.show { display:flex; align-items:flex-start; justify-content:center; }
+  .slip {
+    background: #fff; color:#111;
+    width:100%; max-width:600px;
+    border-radius:12px; overflow:hidden;
+    margin:auto;
+  }
+  .slip-head {
+    background: #0f1a2e; color:#00d4aa;
+    padding:20px 24px; text-align:center;
+  }
+  .slip-head h2 { font-size:20px; letter-spacing:2px; font-weight:700; }
+  .slip-head p { font-size:12px; color:#64748b; margin-top:4px; }
+  .slip-body { padding:20px 24px; }
+  .slip-row {
+    display:flex; justify-content:space-between;
+    padding:8px 0; border-bottom:1px solid #f1f5f9;
+    font-size:14px;
+  }
+  .slip-row:last-child { border-bottom:none; }
+  .slip-row .sl { color:#374151; }
+  .slip-row .sr { font-family:'JetBrains Mono',monospace; font-weight:600; color:#111; }
+  .slip-row.total-row { font-weight:700; font-size:15px; }
+  .slip-row.total-row .sl { color:#111; }
+  .slip-section-title {
+    font-size:11px; letter-spacing:2px; text-transform:uppercase;
+    color:#6b7280; padding:10px 0 4px; font-weight:600;
+  }
+  .slip-net {
+    background:#0f1a2e; color:#00d4aa;
+    padding:16px 24px;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .slip-net .sn-label { font-size:14px; letter-spacing:1px; }
+  .slip-net .sn-value { font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; }
+  .close-btn {
+    display:block; width:calc(100% - 48px); margin:16px 24px;
+    padding:10px; background:#f1f5f9;
+    border:none; border-radius:8px; cursor:pointer;
+    font-size:14px; color:#374151; font-family:'Rajdhani',sans-serif;
+    font-weight:600; letter-spacing:1px;
+  }
+</style>
+</head>
+<body>
+
+<div style="max-width:900px;margin:0 auto;">
+  <div class="header">
+    <h1>💰 Salary Calculator</h1>
+    <p>Basic · DA · HRA · TA · PF · Staff Club</p>
+  </div>
+
+  <div class="main-grid">
+    <!-- Input Card -->
+    <div class="card">
+      <div class="card-title">Employee Details</div>
+
+      <div class="field">
+        <label>Employee Name</label>
+        <input type="text" id="empName" placeholder="जैसे: Ramesh Kumar">
+      </div>
+      <div class="field">
+        <label>Basic Salary (₹)</label>
+        <input type="number" id="basic" placeholder="जैसे: 25000" oninput="autoCalc()">
+      </div>
+      <div class="field">
+        <label>DA Rate (%)</label>
+        <input type="number" id="daRate" placeholder="जैसे: 38" value="38" min="0" max="100" oninput="autoCalc()">
+      </div>
+      <div class="field">
+        <label>PF Employee Deduction</label>
+        <select id="pfPct" onchange="autoCalc()">
+          <option value="12">12% (Standard)</option>
+          <option value="12.5">12.5%</option>
+          <option value="15">15%</option>
+          <option value="20">20%</option>
+        </select>
+      </div>
+
+      <button class="calc-btn" onclick="calculate()">⚡ Calculate Salary</button>
+    </div>
+
+    <!-- Fixed Components Card -->
+    <div class="card">
+      <div class="card-title">Fixed Components</div>
+
+      <div class="result-item" style="margin-bottom:10px;text-align:left;padding:12px 16px;">
+        <div class="r-label">DA Rate</div>
+        <div class="r-value" style="color:var(--gold)" id="daRateShow">38% of Basic</div>
+      </div>
+      <div class="result-item" style="margin-bottom:10px;text-align:left;padding:12px 16px;">
+        <div class="r-label">HRA Rate</div>
+        <div class="r-value" style="color:var(--accent2)">27% of Basic</div>
+      </div>
+      <div class="result-item" style="margin-bottom:10px;text-align:left;padding:12px 16px;">
+        <div class="r-label">Transport Allowance</div>
+        <div class="r-value" style="color:var(--accent2)">₹3,200 Fixed</div>
+      </div>
+      <div class="result-item" style="margin-bottom:10px;text-align:left;padding:12px 16px;">
+        <div class="r-label">PF Employer Contribution</div>
+        <div class="r-value" style="color:var(--gold)">₹1,800 Fixed</div>
+      </div>
+      <div class="result-item" style="text-align:left;padding:12px 16px;">
+        <div class="r-label">Staff Club Deduction</div>
+        <div class="r-value" style="color:var(--red)">₹100 Fixed</div>
+      </div>
+    </div>
+
+    <!-- Results Card -->
+    <div class="card results-card" id="resultsCard">
+      <div class="card-title">Salary Breakdown — <span id="empNameShow" style="color:var(--text);text-transform:none;letter-spacing:0;font-size:14px;"></span></div>
+
+      <!-- Earnings -->
+      <div style="font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">📈 Earnings</div>
+      <div class="result-grid" id="earningsGrid"></div>
+
+      <div class="divider"></div>
+
+      <!-- Deductions -->
+      <div style="font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">📉 Deductions</div>
+      <div class="result-grid" id="deductionsGrid"></div>
+
+      <div class="divider"></div>
+
+      <!-- Totals -->
+      <div class="big-totals">
+        <div class="big-box gross">
+          <div class="b-label">Gross Salary</div>
+          <div class="b-value" id="grossVal">—</div>
+          <div class="b-sub">Basic + DA + HRA + TA</div>
+        </div>
+        <div class="big-box deduction">
+          <div class="b-label">Total Deduction</div>
+          <div class="b-value" id="dedVal">—</div>
+          <div class="b-sub">PF + Staff Club</div>
+        </div>
+        <div class="big-box net">
+          <div class="b-label">Net Take Home</div>
+          <div class="b-value" id="netVal">—</div>
+          <div class="b-sub">Gross − Deductions</div>
+        </div>
+      </div>
+
+      <!-- Employer Cost -->
+      <div class="employer-box">
+        <div>
+          <div class="e-label">Total Cost to Company (CTC)</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">Gross + Employer PF ₹1,800</div>
+        </div>
+        <div class="e-value" id="ctcVal">—</div>
+      </div>
+
+      <button class="slip-btn" onclick="showSlip()">📄 Salary Slip देखें</button>
+    </div>
+  </div>
+</div>
+
+<!-- Salary Slip Modal -->
+<div class="modal-overlay" id="slipModal">
+  <div class="slip">
+    <div class="slip-head">
+      <h2>SALARY SLIP</h2>
+      <p id="slipMonth"></p>
+    </div>
+    <div class="slip-body" id="slipBody"></div>
+    <div class="slip-net">
+      <div class="sn-label">NET TAKE HOME</div>
+      <div class="sn-value" id="slipNet">—</div>
+    </div>
+    <button class="close-btn" onclick="closeSlip()">✕ बंद करें</button>
+  </div>
+</div>
+
+<script>
+  let lastData = {};
+
+  function fmt(n) {
+    return '₹' + new Intl.NumberFormat('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2}).format(n);
+  }
+
+  function autoCalc() {
+    const basic = parseFloat(document.getElementById('basic').value);
+    if (basic && basic > 0) calculate(true);
+  }
+
+  function makeItem(label, value, cls='') {
+    return `<div class="result-item ${cls}">
+      <div class="r-label">${label}</div>
+      <div class="r-value">${fmt(value)}</div>
+    </div>`;
+  }
+
+  function calculate(silent=false) {
+    const basic = parseFloat(document.getElementById('basic').value);
+    const pfPct = parseFloat(document.getElementById('pfPct').value);
+    const empName = document.getElementById('empName').value || 'Employee';
+
+    if (!basic || basic <= 0) {
+      if (!silent) alert('Basic Salary डालो!');
+      return;
+    }
+
+    const daRate = parseFloat(document.getElementById('daRate').value) || 38;
+    const da = basic * (daRate / 100);
+    document.getElementById('daRateShow').textContent = daRate + '% of Basic';
+    const hra = basic * 0.27;
+    const ta = 3200;
+    const gross = basic + da + hra + ta;
+
+    const pfEmployee = basic * (pfPct / 100);
+    const pfEmployer = 1800;
+    const staffClub = 100;
+    const totalDed = pfEmployee + staffClub;
+
+    const net = gross - totalDed;
+    const ctc = gross + pfEmployer;
+
+    lastData = { empName, basic, da, daRate, hra, ta, gross, pfEmployee, pfPct, pfEmployer, staffClub, totalDed, net, ctc };
+
+    // Earnings
+    document.getElementById('earningsGrid').innerHTML =
+      makeItem('Basic', basic, 'blue') +
+      makeItem('DA (38%)', da, 'green') +
+      makeItem('HRA (27%)', hra, 'green') +
+      makeItem('TA (Fixed)', ta, 'green');
+
+    // Deductions
+    document.getElementById('deductionsGrid').innerHTML =
+      makeItem(`PF Employee (${pfPct}%)`, pfEmployee, 'red') +
+      makeItem('Staff Club', staffClub, 'red');
+
+    document.getElementById('grossVal').textContent = fmt(gross);
+    document.getElementById('dedVal').textContent = fmt(totalDed);
+    document.getElementById('netVal').textContent = fmt(net);
+    document.getElementById('ctcVal').textContent = fmt(ctc);
+
+    document.getElementById('empNameShow').textContent = empName;
+    document.getElementById('resultsCard').classList.add('show');
+    if (!silent) document.getElementById('resultsCard').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  function showSlip() {
+    const d = lastData;
+    if (!d.basic) return;
+
+    const now = new Date();
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('slipMonth').textContent = `${months[now.getMonth()]} ${now.getFullYear()} · ${d.empName}`;
+
+    document.getElementById('slipBody').innerHTML = `
+      <div class="slip-section-title">Earnings</div>
+      <div class="slip-row"><span class="sl">Basic Salary</span><span class="sr">${fmt(d.basic)}</span></div>
+      <div class="slip-row"><span class="sl">DA (${d.daRate}% of Basic)</span><span class="sr">${fmt(d.da)}</span></div>
+      <div class="slip-row"><span class="sl">HRA (27% of Basic)</span><span class="sr">${fmt(d.hra)}</span></div>
+      <div class="slip-row"><span class="sl">Transport Allowance</span><span class="sr">${fmt(d.ta)}</span></div>
+      <div class="slip-row total-row"><span class="sl">Gross Salary</span><span class="sr">${fmt(d.gross)}</span></div>
+
+      <div class="slip-section-title" style="margin-top:8px;">Deductions</div>
+      <div class="slip-row"><span class="sl">PF Employee (${d.pfPct}% of Basic)</span><span class="sr" style="color:#ef4444;">− ${fmt(d.pfEmployee)}</span></div>
+      <div class="slip-row"><span class="sl">Staff Club</span><span class="sr" style="color:#ef4444;">− ${fmt(d.staffClub)}</span></div>
+      <div class="slip-row total-row"><span class="sl">Total Deductions</span><span class="sr" style="color:#ef4444;">− ${fmt(d.totalDed)}</span></div>
+
+      <div class="slip-section-title" style="margin-top:8px;">Employer Contribution</div>
+      <div class="slip-row"><span class="sl">PF Employer (Fixed)</span><span class="sr" style="color:#f59e0b;">${fmt(d.pfEmployer)}</span></div>
+      <div class="slip-row total-row"><span class="sl">Total CTC</span><span class="sr" style="color:#f59e0b;">${fmt(d.ctc)}</span></div>
+    `;
+
+    document.getElementById('slipNet').textContent = fmt(d.net);
+    document.getElementById('slipModal').classList.add('show');
+  }
+
+  function closeSlip() {
+    document.getElementById('slipModal').classList.remove('show');
+  }
+</script>
+</body>
+</html>
