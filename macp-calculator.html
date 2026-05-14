@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MACP Pay Fixation Calculator — 7th CPC</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a1628;
+    --navy2: #111f3a;
+    --navy3: #1a2f52;
+    --gold: #c9a84c;
+    --gold2: #e8c76a;
+    --gold-pale: #f5e9c8;
+    --teal: #1e9e8a;
+    --teal2: #25bda4;
+    --red: #e05555;
+    --text: #e8edf5;
+    --text2: #a0aec0;
+    --border: rgba(201,168,76,0.2);
+    --card: rgba(255,255,255,0.04);
+    --card2: rgba(255,255,255,0.07);
+    --radius: 12px;
+    --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--navy);
+    color: var(--text);
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 20% -10%, rgba(201,168,76,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 110%, rgba(30,158,138,0.07) 0%, transparent 60%);
+  }
+
+  header {
+    background: linear-gradient(135deg, var(--navy2), var(--navy3));
+    border-bottom: 1px solid var(--border);
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  }
+
+  .logo {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 0 16px rgba(201,168,76,0.3);
+  }
+
+  header h1 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--gold2);
+    letter-spacing: 0.3px;
+  }
+
+  header p {
+    font-size: 0.78rem;
+    color: var(--text2);
+    margin-top: 2px;
+  }
+
+  .badge {
+    margin-left: auto;
+    background: rgba(201,168,76,0.12);
+    border: 1px solid var(--border);
+    color: var(--gold);
+    font-size: 0.7rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+
+  .section-title {
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(8px);
+    transition: border-color 0.2s;
+  }
+
+  .card:hover { border-color: rgba(201,168,76,0.35); }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 600px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text2);
+    margin-bottom: 7px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  input[type="date"],
+  input[type="number"],
+  input[type="text"],
+  select {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    padding: 10px 14px;
+    transition: border-color 0.2s, background 0.2s;
+    outline: none;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.08);
+  }
+
+  select option { background: var(--navy2); color: var(--text); }
+
+  .radio-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .radio-btn {
+    flex: 1;
+    min-width: 140px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+  }
+
+  .radio-btn input[type="radio"] { display: none; }
+
+  .radio-btn.selected {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.12);
+    color: var(--gold2);
+  }
+
+  .radio-btn .dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--text2);
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .radio-btn.selected .dot {
+    border-color: var(--gold);
+    background: var(--gold);
+    box-shadow: 0 0 8px rgba(201,168,76,0.5);
+  }
+
+  /* Pay Matrix Table */
+  .matrix-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .matrix-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .btn-small {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Noto Sans Devanagari', sans-serif;
+  }
+
+  .btn-small:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  .matrix-table-wrap {
+    overflow-x: auto;
+  }
+
+  .matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+  }
+
+  .matrix-table th {
+    background: rgba(201,168,76,0.1);
+    color: var(--gold);
+    padding: 8px 10px;
+    text-align: center;
+    border: 1px solid var(--border);
+    font-size: 0.72rem;
+    letter-spacing: 0.5px;
+  }
+
+  .matrix-table td {
+    padding: 5px 6px;
+    border: 1px solid rgba(255,255,255,0.06);
+    text-align: center;
+  }
+
+  .matrix-table td.cell-num {
+    color: var(--text2);
+    font-size: 0.7rem;
+    background: rgba(0,0,0,0.15);
+    width: 36px;
+  }
+
+  .matrix-table input.cell-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px dashed rgba(255,255,255,0.15);
+    border-radius: 0;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    padding: 3px 4px;
+    width: 80px;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+
+  .matrix-table input.cell-input:focus {
+    border-bottom-color: var(--gold);
+    background: rgba(201,168,76,0.05);
+    outline: none;
+  }
+
+  .matrix-table input.cell-input.highlight {
+    background: rgba(201,168,76,0.15);
+    border-bottom-color: var(--gold2);
+    color: var(--gold2);
+    font-weight: 600;
+  }
+
+  /* Calculate Button */
+  .btn-calc {
+    width: 100%;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    color: var(--navy);
+    border: none;
+    border-radius: var(--radius);
+    padding: 16px;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+    box-shadow: 0 4px 20px rgba(201,168,76,0.3);
+    margin-top: 8px;
+  }
+
+  .btn-calc:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(201,168,76,0.45);
+  }
+
+  .btn-calc:active { transform: translateY(0); }
+
+  /* Results */
+  #results {
+    display: none;
+    animation: fadeSlide 0.4s ease;
+  }
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-header {
+    background: linear-gradient(135deg, rgba(30,158,138,0.15), rgba(30,158,138,0.05));
+    border: 1px solid rgba(30,158,138,0.3);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .result-header .case-tag {
+    background: var(--teal);
+    color: white;
+    border-radius: 6px;
+    padding: 4px 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .result-header .opt-tag {
+    background: rgba(201,168,76,0.2);
+    border: 1px solid var(--border);
+    color: var(--gold2);
+    border-radius: 6px;
+    padding: 4px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .result-header .verdict {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+  }
+
+  .verdict-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 8px var(--teal2);
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .steps-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  .steps-table th {
+    background: rgba(255,255,255,0.05);
+    color: var(--text2);
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .steps-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    vertical-align: top;
+  }
+
+  .steps-table tr:last-child td { border-bottom: none; }
+
+  .steps-table tr.highlight-row {
+    background: rgba(201,168,76,0.07);
+  }
+
+  .steps-table tr.highlight-row td { color: var(--gold2); }
+
+  .steps-table .step-no {
+    width: 36px;
+    color: var(--text2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+  }
+
+  .steps-table .pay-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+    color: var(--teal2);
+    font-weight: 600;
+  }
+
+  .steps-table .pay-val.final {
+    color: var(--gold2);
+    font-size: 1rem;
+  }
+
+  .compare-box {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 600px) { .compare-box { grid-template-columns: 1fr; } }
+
+  .compare-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    text-align: center;
+  }
+
+  .compare-card.winner {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.08);
+  }
+
+  .compare-card .opt-label {
+    font-size: 0.72rem;
+    letter-spacing: 1.5px;
+    color: var(--text2);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .compare-card.winner .opt-label { color: var(--gold); }
+
+  .compare-card .opt-pay {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .compare-card.winner .opt-pay { color: var(--gold2); }
+
+  .compare-card .opt-sub {
+    font-size: 0.75rem;
+    color: var(--text2);
+    margin-top: 6px;
+  }
+
+  .winner-badge {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--navy);
+    border-radius: 20px;
+    padding: 2px 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-top: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .alert {
+    background: rgba(224,85,85,0.1);
+    border: 1px solid rgba(224,85,85,0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 0.82rem;
+    color: #f0a0a0;
+    margin-bottom: 16px;
+  }
+
+  .info-box {
+    background: rgba(30,158,138,0.08);
+    border: 1px solid rgba(30,158,138,0.25);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 0.82rem;
+    color: #90d5cb;
+    margin-top: 16px;
+    line-height: 1.6;
+  }
+
+  .tab-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text2);
+  }
+
+  .tab.active {
+    background: rgba(201,168,76,0.15);
+    border-color: var(--gold);
+    color: var(--gold2);
+  }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 24px 0;
+  }
+
+  .field-group { margin-bottom: 16px; }
+
+  .helper {
+    font-size: 0.72rem;
+    color: var(--text2);
+    margin-top: 5px;
+    opacity: 0.8;
+  }
+
+  .case-info {
+    background: rgba(30,158,138,0.07);
+    border-left: 3px solid var(--teal);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    color: #90d5cb;
+    margin-top: 10px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⚖</div>
+  <div>
+    <h1>MACP Pay Fixation Calculator</h1>
+    <p>FR 22(1)(A)(1) — 7th Central Pay Commission</p>
+  </div>
+  <div class="badge">7th CPC</div>
+</header>
+
+<main>
+
+  <!-- INPUT SECTION -->
+  <div class="section-title">इनपुट विवरण</div>
+
+  <div class="card">
+    <div class="grid-2">
+      <div class="field-group">
+        <label>MACP Grant की तारीख</label>
+        <input type="date" id="macp_date" onchange="detectCase()">
+        <div id="case_info" class="case-info"></div>
+      </div>
+      <div class="field-group">
+        <label>Annual Increment की तारीख</label>
+        <div class="radio-group">
+          <label class="radio-btn selected" id="radio_july" onclick="selectIncrement('july')">
+            <input type="radio" name="incr" value="july" checked>
+            <div class="dot"></div> 1 जुलाई
+          </label>
+          <label class="radio-btn" id="radio_jan" onclick="selectIncrement('jan')">
+            <input type="radio" name="incr" value="jan">
+            <div class="dot"></div> 1 जनवरी
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="grid-3">
+      <div class="field-group">
+        <label>मौजूदा Basic Pay (₹)</label>
+        <input type="number" id="basic_pay" placeholder="जैसे 58600" min="0" step="100">
+      </div>
+      <div class="field-group">
+        <label>मौजूदा Level (From)</label>
+        <input type="number" id="level_from" placeholder="जैसे 7" min="1" max="18">
+      </div>
+      <div class="field-group">
+        <label>MACP Level (To)</label>
+        <input type="number" id="level_to" placeholder="जैसे 8" min="1" max="18">
+      </div>
+    </div>
+  </div>
+
+  <!-- PAY MATRIX -->
+  <div class="section-title">Pay Matrix Cells</div>
+
+  <div class="card">
+    <div class="matrix-header">
+      <div>
+        <div style="font-size:0.85rem; color:var(--text); margin-bottom:4px;">दोनों Levels के Cells manually enter करें</div>
+        <div class="helper">जितने cells की ज़रूरत हो उतने भरें — कम से कम 5-6 cells प्रत्येक Level में</div>
+      </div>
+      <div class="matrix-controls">
+        <button class="btn-small" onclick="addRow()">+ Row जोड़ें</button>
+        <button class="btn-small" onclick="removeRow()">− Row हटाएं</button>
+        <button class="btn-small" onclick="clearMatrix()">Clear</button>
+      </div>
+    </div>
+
+    <div class="matrix-table-wrap">
+      <table class="matrix-table" id="matrix_table">
+        <thead>
+          <tr>
+            <th>Cell</th>
+            <th id="th_from">Level — (From)</th>
+            <th id="th_to">Level — (To)</th>
+          </tr>
+        </thead>
+        <tbody id="matrix_body"></tbody>
+      </table>
+    </div>
+    <div class="info-box">
+      💡 Pay Matrix में जो figure exist न करे, वहाँ अगली higher figure enter करें। Highlighted cell = आपकी current basic pay।
+    </div>
+  </div>
+
+  <!-- OPTION SELECTION -->
+  <div class="section-title">Option चुनें</div>
+
+  <div class="card">
+    <div class="radio-group">
+      <label class="radio-btn selected" id="opt1_btn" onclick="selectOption(1)">
+        <input type="radio" name="opt" value="1" checked>
+        <div class="dot"></div>
+        <div>
+          <div style="font-weight:600;">Option 1</div>
+          <div style="font-size:0.72rem; color:var(--text2); margin-top:2px;">MACP की तारीख से Pay Fixation</div>
+        </div>
+      </label>
+      <label class="radio-btn" id="opt2_btn" onclick="selectOption(2)">
+        <input type="radio" name="opt" value="2">
+        <div class="dot"></div>
+        <div>
+          <div style="font-weight:600;">Option 2</div>
+          <div style="font-size:0.72rem; color:var(--text2); margin-top:2px;">अगले Increment की तारीख से</div>
+        </div>
+      </label>
+      <label class="radio-btn" id="opt_both_btn" onclick="selectOption('both')">
+        <input type="radio" name="opt" value="both">
+        <div class="dot"></div>
+        <div>
+          <div style="font-weight:600;">दोनों Compare करें</div>
+          <div style="font-size:0.72rem; color:var(--text2); margin-top:2px;">Best option automatically दिखाएगा</div>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  <button class="btn-calc" onclick="calculate()">🧮 Calculate करें</button>
+
+  <!-- RESULTS -->
+  <div id="results">
+    <div class="divider"></div>
+    <div class="section-title">परिणाम</div>
+    <div id="result_content"></div>
+  </div>
+
+</main>
+
+<script>
+  let incrementType = 'july';
+  let selectedOption = 1;
+  let matrixRows = 12;
+
+  // Init matrix
+  function initMatrix() {
+    const tbody = document.getElementById('matrix_body');
+    tbody.innerHTML = '';
+    for (let i = 1; i <= matrixRows; i++) {
+      addMatrixRow(i);
+    }
+  }
+
+  function addMatrixRow(num) {
+    const tbody = document.getElementById('matrix_body');
+    const tr = document.createElement('tr');
+    tr.id = `row_${num}`;
+    tr.innerHTML = `
+      <td class="cell-num">${num}</td>
+      <td><input class="cell-input" type="number" id="from_${num}" placeholder="—" min="0" step="100" oninput="highlightCurrent()"></td>
+      <td><input class="cell-input" type="number" id="to_${num}" placeholder="—" min="0" step="100"></td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  function addRow() {
+    matrixRows++;
+    addMatrixRow(matrixRows);
+    const th_from = document.getElementById('th_from');
+    const lf = document.getElementById('level_from').value;
+    const lt = document.getElementById('level_to').value;
+    updateTableHeaders(lf, lt);
+  }
+
+  function removeRow() {
+    if (matrixRows <= 4) return;
+    const tbody = document.getElementById('matrix_body');
+    const lastRow = document.getElementById(`row_${matrixRows}`);
+    if (lastRow) tbody.removeChild(lastRow);
+    matrixRows--;
+  }
+
+  function clearMatrix() {
+    for (let i = 1; i <= matrixRows; i++) {
+      const fi = document.getElementById(`from_${i}`);
+      const ti = document.getElementById(`to_${i}`);
+      if (fi) fi.value = '';
+      if (ti) ti.value = '';
+    }
+  }
+
+  function updateTableHeaders(lf, lt) {
+    document.getElementById('th_from').textContent = lf ? `Level ${lf} (From)` : 'Level — (From)';
+    document.getElementById('th_to').textContent = lt ? `Level ${lt} (To)` : 'Level — (To)';
+  }
+
+  document.getElementById('level_from').addEventListener('input', function() {
+    updateTableHeaders(this.value, document.getElementById('level_to').value);
+  });
+
+  document.getElementById('level_to').addEventListener('input', function() {
+    updateTableHeaders(document.getElementById('level_from').value, this.value);
+  });
+
+  function highlightCurrent() {
+    const bp = parseInt(document.getElementById('basic_pay').value) || 0;
+    for (let i = 1; i <= matrixRows; i++) {
+      const inp = document.getElementById(`from_${i}`);
+      if (!inp) continue;
+      if (parseInt(inp.value) === bp) {
+        inp.classList.add('highlight');
+      } else {
+        inp.classList.remove('highlight');
+      }
+    }
+  }
+
+  document.getElementById('basic_pay').addEventListener('input', highlightCurrent);
+
+  function selectIncrement(val) {
+    incrementType = val;
+    document.getElementById('radio_july').classList.toggle('selected', val === 'july');
+    document.getElementById('radio_jan').classList.toggle('selected', val === 'jan');
+  }
+
+  function selectOption(val) {
+    selectedOption = val;
+    document.getElementById('opt1_btn').classList.toggle('selected', val === 1);
+    document.getElementById('opt2_btn').classList.toggle('selected', val === 2);
+    document.getElementById('opt_both_btn').classList.toggle('selected', val === 'both');
+  }
+
+  function detectCase() {
+    const dateVal = document.getElementById('macp_date').value;
+    if (!dateVal) return;
+    const d = new Date(dateVal);
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
+    const infoBox = document.getElementById('case_info');
+    infoBox.style.display = 'block';
+
+    let caseNum, desc;
+    if (month === 1 && day === 1) {
+      caseNum = 'Case 1'; desc = '1 जनवरी — कोई Option चुनने की ज़रूरत नहीं।';
+    } else if (month === 7 && day === 1) {
+      caseNum = 'Case 2'; desc = '1 जुलाई — कोई Option चुनने की ज़रूरत नहीं।';
+    } else if ((month >= 2 && month <= 6) || (month === 1 && day > 1)) {
+      caseNum = 'Case 3'; desc = '2 Jan – 30 June — Option 2 लगभग हमेशा फायदेमंद।';
+    } else {
+      caseNum = 'Case 4'; desc = '2 July – 31 Dec — Option 2 लगभग हमेशा फायदेमंद।';
+    }
+
+    infoBox.innerHTML = `<strong>${caseNum} detect हुआ:</strong> ${desc}`;
+  }
+
+  // Get pay matrix arrays
+  function getMatrix() {
+    const fromArr = [], toArr = [];
+    for (let i = 1; i <= matrixRows; i++) {
+      const fi = document.getElementById(`from_${i}`);
+      const ti = document.getElementById(`to_${i}`);
+      const fv = fi ? parseInt(fi.value) : NaN;
+      const tv = ti ? parseInt(ti.value) : NaN;
+      if (!isNaN(fv) && fv > 0) fromArr.push({ cell: i, val: fv });
+      if (!isNaN(tv) && tv > 0) toArr.push({ cell: i, val: tv });
+    }
+    return { fromArr, toArr };
+  }
+
+  // Get next value in array at or above target
+  function getNextCell(arr, target) {
+    const sorted = arr.filter(x => x.val >= target).sort((a, b) => a.val - b.val);
+    return sorted.length > 0 ? sorted[0] : null;
+  }
+
+  // Get next increment in same array
+  function getNextIncrement(arr, currentVal) {
+    const sorted = arr.filter(x => x.val > currentVal).sort((a, b) => a.val - b.val);
+    return sorted.length > 0 ? sorted[0] : null;
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('hi-IN', { day: '2-digit', month: 'long', year: 'numeric' });
+  }
+
+  function formatIncrDate(dateStr, type) {
+    const d = new Date(dateStr);
+    const year = d.getFullYear();
+    const month = d.getMonth() + 1;
+    if (type === 'july') {
+      if (month <= 6) return `01/07/${year}`;
+      else return `01/07/${year + 1}`;
+    } else {
+      if (month <= 12) return `01/01/${year + 1}`;
+    }
+  }
+
+  function nextIncrDate(dateStr, type) {
+    const d = new Date(dateStr);
+    const year = d.getFullYear();
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
+
+    if (type === 'july') {
+      if (month < 7) return `01/07/${year}`;
+      else if (month === 7 && day === 1) return `01/07/${year}`;
+      else return `01/07/${year + 1}`;
+    } else {
+      if (month < 1 || (month === 1 && day === 1)) return `01/01/${year}`;
+      else return `01/01/${year + 1}`;
+    }
+  }
+
+  function afterIncrDate(incrDateStr, type) {
+    // After MACP fixation, next increment is opposite
+    const parts = incrDateStr.split('/');
+    const year = parseInt(parts[2]);
+    const month = parseInt(parts[1]);
+    if (month === 7) {
+      return `01/01/${year + 1}`;
+    } else {
+      return `01/07/${year}`;
+    }
+  }
+
+  function calcOption1(macpDate, basicPay, fromArr, toArr, incrType, lf, lt) {
+    const steps = [];
+    const d = new Date(macpDate);
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
+    const year = d.getFullYear();
+
+    // Get notional increment in from level
+    const notional = getNextIncrement(fromArr, basicPay);
+    if (!notional) return { error: 'From Level matrix में higher cell नहीं मिला। अधिक cells भरें।' };
+
+    // Fix in to level at same or next higher
+    const fixed = getNextCell(toArr, notional.val);
+    if (!fixed) return { error: 'To Level matrix में matching cell नहीं मिला।' };
+
+    const macpDateFmt = `${String(day).padStart(2,'0')}/${String(month).padStart(2,'0')}/${year}`;
+    const prevDay = new Date(d); prevDay.setDate(prevDay.getDate() - 1);
+    const prevFmt = `${String(prevDay.getDate()).padStart(2,'0')}/${String(prevDay.getMonth()+1).padStart(2,'0')}/${prevDay.getFullYear()}`;
+
+    steps.push({ date: prevFmt, desc: `Level ${lf} में Basic Pay (MACP से पहले)`, pay: basicPay, bold: false });
+    steps.push({ date: macpDateFmt, desc: `Level ${lf} में Notional Increment (MACP के कारण) — Cell ${notional.cell}`, pay: notional.val, bold: false });
+    steps.push({ date: macpDateFmt, desc: `Level ${lt} Cell ${fixed.cell} में Pay Fixation (MACP के बाद)`, pay: fixed.val, bold: true });
+
+    // Next increment in to level
+    const nextIncrDateStr = nextIncrDate(macpDate, incrType);
+    const nextCell = getNextIncrement(toArr, fixed.val);
+    if (nextCell) {
+      steps.push({ date: nextIncrDateStr, desc: `Level ${lt} Cell ${nextCell.cell} में Annual Increment`, pay: nextCell.val, bold: false });
+    }
+
+    // Date of next increment after that
+    const nextNextDate = afterIncrDate(nextIncrDateStr, incrType);
+
+    return {
+      steps,
+      finalPay: fixed.val,
+      nextIncrDate: nextNextDate,
+      option: 1
+    };
+  }
+
+  function calcOption2(macpDate, basicPay, fromArr, toArr, incrType, lf, lt) {
+    const steps = [];
+    const d = new Date(macpDate);
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
+    const year = d.getFullYear();
+
+    // On MACP date: fix in next level directly (no notional yet)
+    const initialFix = getNextCell(toArr, basicPay);
+    if (!initialFix) return { error: 'To Level matrix में matching cell नहीं मिला।' };
+
+    const macpDateFmt = `${String(day).padStart(2,'0')}/${String(month).padStart(2,'0')}/${year}`;
+    const prevDay = new Date(d); prevDay.setDate(prevDay.getDate() - 1);
+    const prevFmt = `${String(prevDay.getDate()).padStart(2,'0')}/${String(prevDay.getMonth()+1).padStart(2,'0')}/${prevDay.getFullYear()}`;
+
+    steps.push({ date: prevFmt, desc: `Level ${lf} में Basic Pay (MACP से पहले)`, pay: basicPay, bold: false });
+    steps.push({ date: macpDateFmt, desc: `Level ${lt} Cell ${initialFix.cell} में Pay Fixation (Option 2 — अस्थायी)`, pay: initialFix.val, bold: false });
+
+    // On annual increment date: 
+    // 1. Annual increment in from level
+    const incrDateStr = nextIncrDate(macpDate, incrType);
+    const annualIncr = getNextIncrement(fromArr, basicPay);
+    if (!annualIncr) return { error: 'From Level matrix में annual increment cell नहीं मिला।' };
+
+    steps.push({ date: incrDateStr, desc: `Level ${lf} में Annual Increment — Cell ${annualIncr.cell}`, pay: annualIncr.val, bold: false });
+
+    // 2. Notional increment in from level
+    const notional = getNextIncrement(fromArr, annualIncr.val);
+    if (!notional) return { error: 'From Level matrix में Notional Increment के लिए higher cell नहीं मिला।' };
+
+    steps.push({ date: incrDateStr, desc: `Level ${lf} में Notional Increment (MACP के कारण) — Cell ${notional.cell}`, pay: notional.val, bold: false });
+
+    // 3. Final fix in to level
+    const finalFixed = getNextCell(toArr, notional.val);
+    if (!finalFixed) return { error: 'To Level matrix में final fixation cell नहीं मिला।' };
+
+    steps.push({ date: incrDateStr, desc: `Level ${lt} Cell ${finalFixed.cell} में Final Pay Fixation`, pay: finalFixed.val, bold: true });
+
+    // Next increment
+    const nextNextDate = afterIncrDate(incrDateStr, incrType);
+    const nextCell = getNextIncrement(toArr, finalFixed.val);
+    if (nextCell) {
+      steps.push({ date: nextNextDate, desc: `Level ${lt} Cell ${nextCell.cell} में Annual Increment`, pay: nextCell.val, bold: false });
+    }
+
+    const afterNext = afterIncrDate(nextNextDate, incrType);
+
+    return {
+      steps,
+      finalPay: finalFixed.val,
+      nextIncrDate: afterNext,
+      option: 2
+    };
+  }
+
+  function renderSteps(result, optLabel) {
+    if (result.error) {
+      return `<div class="alert">⚠ ${result.error}</div>`;
+    }
+
+    let html = `<table class="steps-table"><thead><tr>
+      <th>#</th><th>तारीख</th><th>विवरण</th><th>Basic Pay (₹)</th>
+    </tr></thead><tbody>`;
+
+    result.steps.forEach((s, i) => {
+      html += `<tr class="${s.bold ? 'highlight-row' : ''}">
+        <td class="step-no">${i+1}</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;white-space:nowrap;color:var(--text2)">${s.date}</td>
+        <td>${s.desc}</td>
+        <td class="pay-val ${s.bold ? 'final' : ''}">₹${s.pay.toLocaleString('en-IN')}</td>
+      </tr>`;
+    });
+
+    html += `</tbody></table>`;
+    html += `<div class="info-box">📅 अगले Increment की तारीख: <strong>${result.nextIncrDate}</strong> — और उसके बाद हर साल इसी तारीख को।</div>`;
+    return html;
+  }
+
+  function calculate() {
+    const macpDate = document.getElementById('macp_date').value;
+    const basicPay = parseInt(document.getElementById('basic_pay').value);
+    const lf = document.getElementById('level_from').value;
+    const lt = document.getElementById('level_to').value;
+
+    // Validation
+    let errors = [];
+    if (!macpDate) errors.push('MACP Grant की तारीख डालें');
+    if (!basicPay || isNaN(basicPay)) errors.push('Basic Pay डालें');
+    if (!lf) errors.push('From Level डालें');
+    if (!lt) errors.push('To Level डालें');
+
+    const { fromArr, toArr } = getMatrix();
+    if (fromArr.length < 3) errors.push('From Level के कम से कम 3 cells भरें');
+    if (toArr.length < 3) errors.push('To Level के कम से कम 3 cells भरें');
+
+    if (errors.length > 0) {
+      const resDiv = document.getElementById('results');
+      resDiv.style.display = 'block';
+      document.getElementById('result_content').innerHTML =
+        `<div class="alert">⚠ ${errors.join('<br>')}</div>`;
+      resDiv.scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+
+    // Detect case
+    const d = new Date(macpDate);
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
+    let caseLabel;
+    if (month === 1 && day === 1) caseLabel = 'Case 1 (1 जनवरी)';
+    else if (month === 7 && day === 1) caseLabel = 'Case 2 (1 जुलाई)';
+    else if ((month >= 2 && month <= 6) || (month === 1 && day > 1)) caseLabel = 'Case 3 (Jan–June)';
+    else caseLabel = 'Case 4 (July–Dec)';
+
+    let html = '';
+
+    // Case 1 & 2: No option needed
+    if ((month === 1 && day === 1) || (month === 7 && day === 1)) {
+      const r = calcOption1(macpDate, basicPay, fromArr, toArr, incrementType, lf, lt);
+      html += `<div class="result-header">
+        <div class="case-tag">${caseLabel}</div>
+        <div class="opt-tag">Option चुनने की ज़रूरत नहीं</div>
+        <div class="verdict"><div class="verdict-dot"></div> Final Pay: ₹${r.finalPay ? r.finalPay.toLocaleString('en-IN') : '—'}</div>
+      </div>`;
+      html += `<div class="card">${renderSteps(r, '')}</div>`;
+    } else if (selectedOption === 1) {
+      const r1 = calcOption1(macpDate, basicPay, fromArr, toArr, incrementType, lf, lt);
+      html += `<div class="result-header">
+        <div class="case-tag">${caseLabel}</div>
+        <div class="opt-tag">Option 1</div>
+        <div class="verdict"><div class="verdict-dot"></div> Final Pay: ₹${r1.finalPay ? r1.finalPay.toLocaleString('en-IN') : '—'}</div>
+      </div>`;
+      html += `<div class="card">${renderSteps(r1, 'Option 1')}</div>`;
+    } else if (selectedOption === 2) {
+      const r2 = calcOption2(macpDate, basicPay, fromArr, toArr, incrementType, lf, lt);
+      html += `<div class="result-header">
+        <div class="case-tag">${caseLabel}</div>
+        <div class="opt-tag">Option 2</div>
+        <div class="verdict"><div class="verdict-dot"></div> Final Pay: ₹${r2.finalPay ? r2.finalPay.toLocaleString('en-IN') : '—'}</div>
+      </div>`;
+      html += `<div class="card">${renderSteps(r2, 'Option 2')}</div>`;
+    } else {
+      // Both compare
+      const r1 = calcOption1(macpDate, basicPay, fromArr, toArr, incrementType, lf, lt);
+      const r2 = calcOption2(macpDate, basicPay, fromArr, toArr, incrementType, lf, lt);
+
+      const winner = (!r1.error && !r2.error) ?
+        (r2.finalPay > r1.finalPay ? 2 : r2.finalPay < r1.finalPay ? 1 : 'equal') : null;
+
+      html += `<div class="result-header">
+        <div class="case-tag">${caseLabel}</div>
+        <div class="opt-tag">Comparison Mode</div>
+        ${winner ? `<div class="verdict"><div class="verdict-dot"></div> Option ${winner === 'equal' ? 'बराबर' : winner} बेहतर</div>` : ''}
+      </div>`;
+
+      // Comparison cards
+      if (!r1.error && !r2.error) {
+        html += `<div class="compare-box">
+          <div class="compare-card ${winner === 1 ? 'winner' : ''}">
+            <div class="opt-label">Option 1</div>
+            <div class="opt-pay">₹${r1.finalPay.toLocaleString('en-IN')}</div>
+            <div class="opt-sub">MACP की तारीख से Fixation</div>
+            ${winner === 1 ? '<div class="winner-badge">✓ बेहतर Option</div>' : ''}
+          </div>
+          <div class="compare-card ${winner === 2 ? 'winner' : ''}">
+            <div class="opt-label">Option 2</div>
+            <div class="opt-pay">₹${r2.finalPay.toLocaleString('en-IN')}</div>
+            <div class="opt-sub">अगले Increment से Fixation</div>
+            ${winner === 2 ? '<div class="winner-badge">✓ बेहतर Option</div>' : ''}
+            ${winner === 'equal' ? '<div class="winner-badge" style="background:var(--teal)">= बराबर</div>' : ''}
+          </div>
+        </div>`;
+      }
+
+      // Tabs for detailed steps
+      html += `<div class="tab-bar">
+        <div class="tab active" id="tab_opt1" onclick="showTab('opt1')">Option 1 — विस्तार</div>
+        <div class="tab" id="tab_opt2" onclick="showTab('opt2')">Option 2 — विस्तार</div>
+      </div>`;
+
+      html += `<div class="tab-content active" id="tc_opt1"><div class="card">${renderSteps(r1, 'Option 1')}</div></div>`;
+      html += `<div class="tab-content" id="tc_opt2"><div class="card">${renderSteps(r2, 'Option 2')}</div></div>`;
+    }
+
+    const resDiv = document.getElementById('results');
+    resDiv.style.display = 'block';
+    document.getElementById('result_content').innerHTML = html;
+    resDiv.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function showTab(which) {
+    document.getElementById('tc_opt1').classList.toggle('active', which === 'opt1');
+    document.getElementById('tc_opt2').classList.toggle('active', which === 'opt2');
+    document.getElementById('tab_opt1').classList.toggle('active', which === 'opt1');
+    document.getElementById('tab_opt2').classList.toggle('active', which === 'opt2');
+  }
+
+  // Initialize
+  initMatrix();
+</script>
+</body>
+</html>
